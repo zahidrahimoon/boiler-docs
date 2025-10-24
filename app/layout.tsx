@@ -4,22 +4,23 @@ import { getPageMap } from "nextra/page-map";
 import "nextra-theme-docs/style.css";
 
 export const metadata = {
-  title: "My Cool Docs Site",
+  title: "Next.js Enterprise Starter Kit - Documentation",
+  description: "Production-ready Next.js 15 starter template with advanced dynamic layout system, comprehensive form handling, real-time features, and enterprise-grade architecture.",
 };
 
 const banner = (
-  <Banner storageKey="some-key">My Project 1.0.0 is released 🎉</Banner>
+  <Banner storageKey="enterprise-starter-v1">Next.js Enterprise Starter Kit v1.0.0 is now available! 🚀</Banner>
 );
 const navbar = (
   <Navbar
-    logo={<b>🦐 My Cool Project</b>}
-    logoLink={"https://bhavyadang.in"}
-    projectLink="https://github.com/bhavya-dang"
-    chatLink="https://discord.gg/"
+    logo={<b>⚡ Next.js Enterprise Starter</b>}
+    logoLink={"/"}
+    projectLink="https://github.com/zahidrahimoon/next-starter"
+    chatLink="https://discord.gg/nextjs"
   />
 );
 const footer = (
-  <Footer>MIT {new Date().getFullYear()} © My Cool Project.</Footer>
+  <Footer>MIT {new Date().getFullYear()} © Next.js Enterprise Starter Kit.</Footer>
 );
 
 const search = <Search placeholder="Search docs.."></Search>;
@@ -48,7 +49,7 @@ export default async function RootLayout({
           banner={banner}
           navbar={navbar}
           pageMap={await getPageMap()}
-          docsRepositoryBase="https://github.com/bhavya-dang/my-project"
+          docsRepositoryBase="https://github.com/zahidrahimoon/next-starter"
           footer={footer}
           search={search}
           editLink={null}

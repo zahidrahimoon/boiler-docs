@@ -1,9 +1,15 @@
 /* eslint-disable import/no-anonymous-default-export */
 export default {
-  tools: "Tools 🛠️",
-  resources: "Resources 🔥",
+  introduction: "Introduction",
+  "getting-started": "Getting Started",
+  architecture: "Architecture",
+  "core-systems": "Core Systems",
+  development: "Development",
+  deployment: "Deployment",
   "###": {
     type: "separator",
   },
-  docker: "Docker 🐳",
+  examples: "Examples",
+  "api-reference": "API Reference",
+  troubleshooting: "Troubleshooting",
 };

@@ -1,0 +1,312 @@
+# Getting Started
+
+Get your Next.js Enterprise Starter Kit up and running in minutes with this comprehensive setup guide.
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed on your system:
+
+- **Node.js 18+** - [Download from nodejs.org](https://nodejs.org/)
+- **pnpm** (recommended) or **npm** - Package manager
+- **Git** - Version control system
+
+### Verify Installation
+
+```bash
+node --version  # Should be 18.0.0 or higher
+npm --version   # Should be 8.0.0 or higher
+git --version   # Any recent version
+```
+
+## Installation
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/zahidrahimoon/next-starter.git
+cd nextjs-starter
+```
+
+### 2. Install Dependencies
+
+Using npm (recommended):
+```bash
+npm install
+```
+
+Using pnpm:
+```bash
+pnpm install
+```
+
+Using yarn:
+```bash
+yarn install
+```
+
+### 3. Environment Setup
+
+Copy the example environment file and configure your variables:
+
+```bash
+cp .env.example .env.local
+```
+
+Edit `.env.local` with your configuration:
+
+```bash
+# API Configuration
+NEXT_PUBLIC_API_URL=http://localhost:3001/api
+
+# Authentication
+NEXTAUTH_SECRET=your-secret-key-here
+NEXTAUTH_URL=http://localhost:3000
+
+# Database (if using)
+DATABASE_URL=postgresql://username:password@localhost:5432/dbname
+
+# Socket.IO (for real-time features)
+NEXT_PUBLIC_SOCKET_URL=http://localhost:4000
+
+# Optional: External Services
+NEXT_PUBLIC_ANALYTICS_ID=your-analytics-id
+```
+
+### 4. Run the Development Server
+
+```bash
+npm run dev
+```
+
+Your application will be available at [http://localhost:3000](http://localhost:3000).
+
+## Project Structure
+
+Here's what you'll find in your new project:
+
+```
+nextjs-starter/
+├── app/                    # Next.js App Router
+│   ├── (auth)/            # Authentication routes
+│   ├── dashboard/         # Dashboard pages
+│   ├── globals.css        # Global styles
+│   ├── layout.tsx         # Root layout
+│   └── page.tsx           # Home page
+├── components/            # Reusable components
+│   ├── ui/               # shadcn/ui components
+│   ├── forms/            # Form components
+│   ├── layout/           # Layout components
+│   └── dashboard/        # Dashboard components
+├── lib/                  # Utility libraries
+│   ├── api.ts           # API client configuration
+│   ├── auth.ts          # Authentication utilities
+│   ├── utils.ts         # General utilities
+│   └── validations.ts   # Zod schemas
+├── store/               # Redux store
+│   ├── slices/         # Redux slices
+│   └── index.ts        # Store configuration
+├── hooks/              # Custom React hooks
+├── types/              # TypeScript type definitions
+├── public/             # Static assets
+└── __tests__/          # Test files
+```
+
+## First Steps
+
+### 1. Explore the Dashboard
+
+Navigate to [http://localhost:3000/dashboard](http://localhost:3000/dashboard) to see the main dashboard interface.
+
+### 2. Check the Components
+
+Visit [http://localhost:3000/components](http://localhost:3000/components) to explore the available UI components.
+
+### 3. Test Authentication
+
+The starter includes a complete authentication flow:
+- Login/Register pages
+- Password reset functionality
+- Protected routes
+- Role-based access control
+
+## Development Tools
+
+### Storybook
+
+Start Storybook for isolated component development:
+
+```bash
+npm run storybook
+```
+
+Access Storybook at [http://localhost:6006](http://localhost:6006).
+
+### Testing
+
+Run the test suite:
+
+```bash
+# Run all tests
+npm run test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Generate coverage report
+npm run test:coverage
+```
+
+### Linting and Formatting
+
+```bash
+# Check for linting errors
+npm run lint
+
+# Fix linting errors
+npm run lint:fix
+
+# Format code with Prettier
+npm run format
+```
+
+## Real-time Features Setup
+
+To test Socket.IO and WebSocket functionality, set up a local test server:
+
+### 1. Create Test Server
+
+```bash
+mkdir socket-test-server
+cd socket-test-server
+npm init -y
+npm install express socket.io
+```
+
+### 2. Server Configuration
+
+Create `server.js`:
+
+```javascript
+import express from "express";
+import http from "http";
+import { Server } from "socket.io";
+
+const app = express();
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+  transports: ["websocket", "polling"],
+  pingInterval: 25000,
+  pingTimeout: 5000,
+});
+
+io.on("connection", (socket) => {
+  console.log("✅ Client connected:", socket.id);
+  
+  socket.emit("welcome", {
+    message: "Hello from Socket.IO server!",
+    id: socket.id,
+    timestamp: new Date().toISOString(),
+  });
+
+  socket.on("message", (data) => {
+    console.log("📩 Message received:", data);
+    socket.emit("message", { 
+      echo: data, 
+      receivedAt: new Date().toISOString() 
+    });
+  });
+
+  socket.on("disconnect", (reason) => {
+    console.log("❌ Client disconnected:", socket.id, "Reason:", reason);
+  });
+});
+
+app.get("/", (req, res) => {
+  res.send("Socket.IO Test Server is running ✅");
+});
+
+const PORT = process.env.PORT || 4000;
+server.listen(PORT, () => {
+  console.log(`🚀 Socket.IO server running on http://localhost:${PORT}`);
+});
+```
+
+### 3. Start Test Server
+
+```bash
+node server.js
+```
+
+## Build for Production
+
+### 1. Create Production Build
+
+```bash
+npm run build
+```
+
+### 2. Start Production Server
+
+```bash
+npm run start
+```
+
+### 3. Analyze Bundle
+
+```bash
+npm run analyze
+```
+
+## Next Steps
+
+Now that you have the starter kit running:
+
+1. **Explore the Architecture** - Learn about the dynamic layout system
+2. **Customize Components** - Modify the UI components to match your brand
+3. **Set Up Authentication** - Configure your authentication provider
+4. **Add Your Features** - Start building your application-specific features
+5. **Deploy** - Choose your deployment platform and go live
+
+## Common Issues
+
+### Port Already in Use
+
+If port 3000 is already in use:
+
+```bash
+npm run dev -- -p 3001
+```
+
+### Node Version Issues
+
+Use Node Version Manager (nvm) to switch Node versions:
+
+```bash
+nvm install 18
+nvm use 18
+```
+
+### Package Installation Errors
+
+Clear npm cache and reinstall:
+
+```bash
+npm cache clean --force
+rm -rf node_modules package-lock.json
+npm install
+```
+
+## Getting Help
+
+- **Documentation**: Browse this documentation for detailed guides
+- **GitHub Issues**: Report bugs or request features
+- **Discord**: Join our community for real-time help
+- **Examples**: Check the examples section for common use cases
+
+Ready to dive deeper? Check out the [Architecture](/architecture) section to understand how everything works together! 🚀

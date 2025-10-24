@@ -1,0 +1,601 @@
+# Deployment
+
+Deploy your Next.js Enterprise Starter Kit to production with confidence using these comprehensive deployment guides for various platforms.
+
+## Pre-Deployment Checklist
+
+Before deploying to production, ensure you've completed these essential steps:
+
+### 1. Environment Configuration
+
+```bash
+# Production environment variables
+NEXT_PUBLIC_API_URL=https://api.yourdomain.com
+NEXTAUTH_SECRET=your-production-secret-key
+NEXTAUTH_URL=https://yourdomain.com
+DATABASE_URL=your-production-database-url
+NEXT_PUBLIC_SOCKET_URL=wss://socket.yourdomain.com
+```
+
+### 2. Build Optimization
+
+```bash
+# Test production build locally
+npm run build
+npm run start
+
+# Analyze bundle size
+npm run analyze
+
+# Run production tests
+npm run test:prod
+```
+
+### 3. Security Checklist
+
+- [ ] Update all default secrets and API keys
+- [ ] Enable HTTPS/SSL certificates
+- [ ] Configure Content Security Policy (CSP)
+- [ ] Set up proper CORS policies
+- [ ] Enable rate limiting
+- [ ] Configure secure headers
+
+### 4. Performance Optimization
+
+```typescript
+// next.config.mjs - Production optimizations
+const nextConfig = {
+  // Enable compression
+  compress: true,
+  
+  // Optimize images
+  images: {
+    domains: ['yourdomain.com'],
+    formats: ['image/webp', 'image/avif'],
+  },
+  
+  // Enable experimental features
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['@radix-ui/react-icons'],
+  },
+  
+  // Security headers
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin',
+          },
+        ],
+      },
+    ];
+  },
+};
+```
+
+## Vercel Deployment
+
+Vercel provides the easiest deployment experience for Next.js applications.
+
+### 1. Quick Deploy
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/zahidrahimoon/next-starter)
+
+### 2. Manual Deployment
+
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Login to Vercel
+vercel login
+
+# Deploy to production
+vercel --prod
+```
+
+### 3. Environment Variables
+
+Configure environment variables in the Vercel dashboard:
+
+```bash
+# Vercel CLI method
+vercel env add NEXT_PUBLIC_API_URL production
+vercel env add NEXTAUTH_SECRET production
+vercel env add DATABASE_URL production
+```
+
+### 4. Custom Domain
+
+```bash
+# Add custom domain
+vercel domains add yourdomain.com
+
+# Configure DNS
+# Add CNAME record: www -> cname.vercel-dns.com
+# Add A record: @ -> 76.76.19.61
+```
+
+### 5. Vercel Configuration
+
+```json
+// vercel.json
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "regions": ["iad1", "sfo1"],
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "https://yourdomain.com"
+        }
+      ]
+    }
+  ]
+}
+```
+
+## Netlify Deployment
+
+Deploy to Netlify with serverless functions support.
+
+### 1. Build Configuration
+
+```toml
+# netlify.toml
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "18"
+  NPM_VERSION = "8"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+```
+
+### 2. Serverless Functions
+
+```typescript
+// netlify/functions/api.ts
+import { NextRequest } from 'next/server';
+import { handler } from '../../app/api/route';
+
+export default async function netlifyHandler(req: NextRequest) {
+  return await handler(req);
+}
+```
+
+### 3. Environment Variables
+
+```bash
+# Netlify CLI
+npm install -g netlify-cli
+netlify login
+netlify env:set NEXT_PUBLIC_API_URL "https://api.yourdomain.com"
+netlify env:set NEXTAUTH_SECRET "your-secret"
+```
+
+## AWS Deployment
+
+Deploy to AWS using various services for maximum control and scalability.
+
+### 1. AWS Amplify
+
+```yaml
+# amplify.yml
+version: 1
+applications:
+  - frontend:
+      phases:
+        preBuild:
+          commands:
+            - npm ci
+        build:
+          commands:
+            - npm run build
+      artifacts:
+        baseDirectory: .next
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - node_modules/**/*
+          - .next/cache/**/*
+```
+
+### 2. AWS ECS with Docker
+
+```dockerfile
+# Dockerfile
+FROM node:18-alpine AS base
+
+# Install dependencies only when needed
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+RUN npm ci
+
+# Rebuild the source code only when needed
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+ENV NEXT_TELEMETRY_DISABLED 1
+RUN npm run build
+
+# Production image, copy all the files and run next
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED 1
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=builder /app/public ./public
+
+# Set the correct permission for prerender cache
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
+
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
+
+CMD ["node", "server.js"]
+```
+
+### 3. ECS Task Definition
+
+```json
+{
+  "family": "nextjs-enterprise-starter",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::account:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "nextjs-app",
+      "image": "your-account.dkr.ecr.region.amazonaws.com/nextjs-enterprise:latest",
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "NODE_ENV",
+          "value": "production"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "NEXTAUTH_SECRET",
+          "valueFrom": "arn:aws:secretsmanager:region:account:secret:nextjs-secrets"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/nextjs-enterprise-starter",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}
+```
+
+## Digital Ocean Deployment
+
+Deploy to Digital Ocean App Platform for simplicity and cost-effectiveness.
+
+### 1. App Spec Configuration
+
+```yaml
+# .do/app.yaml
+name: nextjs-enterprise-starter
+services:
+- name: web
+  source_dir: /
+  github:
+    repo: your-username/nextjs-enterprise-starter
+    branch: main
+  run_command: npm start
+  build_command: npm run build
+  environment_slug: node-js
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  envs:
+  - key: NODE_ENV
+    value: production
+  - key: NEXT_PUBLIC_API_URL
+    value: ${API_URL}
+  - key: NEXTAUTH_SECRET
+    value: ${NEXTAUTH_SECRET}
+    type: SECRET
+```
+
+### 2. Database Setup
+
+```bash
+# Create managed database
+doctl databases create nextjs-db --engine postgres --size db-s-1vcpu-1gb
+
+# Get connection details
+doctl databases connection nextjs-db
+
+# Set environment variable
+doctl apps create-deployment --spec .do/app.yaml
+```
+
+## Self-Hosted Deployment
+
+Deploy to your own servers using PM2 and Nginx.
+
+### 1. Server Setup
+
+```bash
+# Install Node.js and PM2
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get install -y nodejs
+sudo npm install -g pm2
+
+# Clone and setup application
+git clone https://github.com/zahidrahimoon/next-starter.git
+cd nextjs-enterprise-starter
+npm ci
+npm run build
+```
+
+### 2. PM2 Configuration
+
+```json
+// ecosystem.config.js
+module.exports = {
+  apps: [
+    {
+      name: 'nextjs-enterprise-starter',
+      script: 'npm',
+      args: 'start',
+      cwd: '/path/to/your/app',
+      instances: 'max',
+      exec_mode: 'cluster',
+      env: {
+        NODE_ENV: 'production',
+        PORT: 3000,
+      },
+      env_production: {
+        NODE_ENV: 'production',
+        NEXT_PUBLIC_API_URL: 'https://api.yourdomain.com',
+      },
+      error_file: '/var/log/pm2/nextjs-error.log',
+      out_file: '/var/log/pm2/nextjs-out.log',
+      log_file: '/var/log/pm2/nextjs-combined.log',
+      time: true,
+    },
+  ],
+};
+```
+
+### 3. Nginx Configuration
+
+```nginx
+# /etc/nginx/sites-available/nextjs-enterprise-starter
+server {
+    listen 80;
+    server_name yourdomain.com www.yourdomain.com;
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name yourdomain.com www.yourdomain.com;
+
+    ssl_certificate /path/to/ssl/certificate.crt;
+    ssl_certificate_key /path/to/ssl/private.key;
+
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+    add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
+
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_proxied expired no-cache no-store private must-revalidate auth;
+    gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # Static files caching
+    location /_next/static {
+        alias /path/to/your/app/.next/static;
+        expires 365d;
+        access_log off;
+    }
+
+    location /public {
+        alias /path/to/your/app/public;
+        expires 30d;
+        access_log off;
+    }
+}
+```
+
+### 4. SSL Certificate (Let's Encrypt)
+
+```bash
+# Install Certbot
+sudo apt install certbot python3-certbot-nginx
+
+# Obtain SSL certificate
+sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+
+# Auto-renewal
+sudo crontab -e
+# Add: 0 12 * * * /usr/bin/certbot renew --quiet
+```
+
+## Monitoring and Maintenance
+
+### 1. Health Checks
+
+```typescript
+// app/api/health/route.ts
+import { NextResponse } from 'next/server';
+
+export async function GET() {
+  try {
+    // Check database connection
+    // Check external services
+    // Check system resources
+    
+    return NextResponse.json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      version: process.env.npm_package_version,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        status: 'unhealthy',
+        error: error.message,
+        timestamp: new Date().toISOString(),
+      },
+      { status: 503 }
+    );
+  }
+}
+```
+
+### 2. Logging and Monitoring
+
+```bash
+# PM2 monitoring
+pm2 monit
+
+# View logs
+pm2 logs nextjs-enterprise-starter
+
+# Restart application
+pm2 restart nextjs-enterprise-starter
+
+# Update application
+git pull origin main
+npm ci
+npm run build
+pm2 reload nextjs-enterprise-starter
+```
+
+### 3. Backup Strategy
+
+```bash
+#!/bin/bash
+# backup.sh - Database and file backup script
+
+# Database backup
+pg_dump $DATABASE_URL > backup_$(date +%Y%m%d_%H%M%S).sql
+
+# File backup
+tar -czf app_backup_$(date +%Y%m%d_%H%M%S).tar.gz /path/to/your/app
+
+# Upload to S3 (optional)
+aws s3 cp backup_*.sql s3://your-backup-bucket/
+aws s3 cp app_backup_*.tar.gz s3://your-backup-bucket/
+
+# Cleanup old backups (keep last 7 days)
+find . -name "backup_*.sql" -mtime +7 -delete
+find . -name "app_backup_*.tar.gz" -mtime +7 -delete
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Build Failures**
+   ```bash
+   # Clear cache and rebuild
+   rm -rf .next node_modules
+   npm ci
+   npm run build
+   ```
+
+2. **Memory Issues**
+   ```bash
+   # Increase Node.js memory limit
+   NODE_OPTIONS="--max-old-space-size=4096" npm run build
+   ```
+
+3. **Environment Variables**
+   ```bash
+   # Verify environment variables
+   printenv | grep NEXT_PUBLIC
+   ```
+
+4. **SSL Certificate Issues**
+   ```bash
+   # Check certificate validity
+   openssl x509 -in certificate.crt -text -noout
+   ```
+
+Choose the deployment method that best fits your requirements, infrastructure, and team expertise. Each option provides different levels of control, scalability, and maintenance requirements.

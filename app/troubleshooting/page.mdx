@@ -1,0 +1,630 @@
+# Troubleshooting
+
+Common issues and solutions when working with the Next.js Enterprise Starter Kit.
+
+## Installation Issues
+
+### Node.js Version Compatibility
+
+**Problem:** Build fails with Node.js version errors.
+
+**Solution:**
+```bash
+# Check your Node.js version
+node --version
+
+# Install Node.js 18+ if needed
+# Using nvm (recommended)
+nvm install 18
+nvm use 18
+
+# Or download from nodejs.org
+```
+
+**Prevention:**
+- Always use Node.js 18 or higher
+- Consider using `.nvmrc` file for team consistency
+- Use Docker for consistent environments
+
+### Package Installation Errors
+
+**Problem:** `npm install` fails with dependency conflicts.
+
+**Solution:**
+```bash
+# Clear npm cache
+npm cache clean --force
+
+# Remove node_modules and package-lock.json
+rm -rf node_modules package-lock.json
+
+# Reinstall dependencies
+npm install
+
+# If still failing, try with legacy peer deps
+npm install --legacy-peer-deps
+```
+
+**Alternative Solutions:**
+```bash
+# Use pnpm instead of npm
+npm install -g pnpm
+pnpm install
+
+# Use yarn
+npm install -g yarn
+yarn install
+```
+
+### TypeScript Configuration Issues
+
+**Problem:** TypeScript compilation errors on fresh install.
+
+**Solution:**
+```bash
+# Regenerate TypeScript configuration
+npx tsc --init
+
+# Or copy from the starter template
+curl -o tsconfig.json https://raw.githubusercontent.com/zahidrahimoon/next-starter/main/tsconfig.json
+
+# Check for missing type definitions
+npm install --save-dev @types/node @types/react @types/react-dom
+```
+
+## Build and Development Issues
+
+### Build Failures
+
+**Problem:** `npm run build` fails with various errors.
+
+**Common Solutions:**
+
+1. **Memory Issues:**
+```bash
+# Increase Node.js memory limit
+NODE_OPTIONS="--max-old-space-size=4096" npm run build
+
+# Or set in package.json
+"scripts": {
+  "build": "NODE_OPTIONS='--max-old-space-size=4096' next build"
+}
+```
+
+2. **TypeScript Errors:**
+```bash
+# Skip TypeScript checks during build (temporary)
+npm run build -- --no-lint
+
+# Fix TypeScript errors properly
+npm run type-check
+```
+
+3. **ESLint Errors:**
+```bash
+# Skip ESLint during build (temporary)
+ESLINT_NO_DEV_ERRORS=true npm run build
+
+# Fix ESLint errors
+npm run lint:fix
+```
+
+### Development Server Issues
+
+**Problem:** Development server won't start or crashes frequently.
+
+**Solutions:**
+
+1. **Port Already in Use:**
+```bash
+# Use different port
+npm run dev -- -p 3001
+
+# Or kill process using port 3000
+lsof -ti:3000 | xargs kill -9
+```
+
+2. **File Watching Issues:**
+```bash
+# Increase file watcher limit (Linux/macOS)
+echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+
+# Or use polling
+npm run dev -- --experimental-watch-mode
+```
+
+3. **Hot Reload Not Working:**
+```bash
+# Clear Next.js cache
+rm -rf .next
+
+# Restart development server
+npm run dev
+```
+
+### Performance Issues
+
+**Problem:** Slow build times or large bundle sizes.
+
+**Solutions:**
+
+1. **Analyze Bundle Size:**
+```bash
+# Install bundle analyzer
+npm install --save-dev @next/bundle-analyzer
+
+# Analyze bundle
+npm run build
+npm run analyze
+```
+
+2. **Optimize Imports:**
+```typescript
+// Bad: Imports entire library
+import * as _ from 'lodash';
+
+// Good: Import only what you need
+import { debounce } from 'lodash';
+
+// Better: Use tree-shakable alternatives
+import debounce from 'lodash/debounce';
+```
+
+3. **Enable SWC Minification:**
+```javascript
+// next.config.mjs
+const nextConfig = {
+  swcMinify: true,
+  experimental: {
+    optimizeCss: true,
+  },
+};
+```
+
+## Runtime Issues
+
+### Authentication Problems
+
+**Problem:** Users can't log in or stay logged in.
+
+**Common Causes and Solutions:**
+
+1. **Environment Variables:**
+```bash
+# Check if auth variables are set
+echo $NEXTAUTH_SECRET
+echo $NEXTAUTH_URL
+
+# Set in .env.local
+NEXTAUTH_SECRET=your-secret-key-here
+NEXTAUTH_URL=http://localhost:3000
+```
+
+2. **Cookie Issues:**
+```typescript
+// Check cookie settings in auth configuration
+cookies: {
+  sessionToken: {
+    name: 'next-auth.session-token',
+    options: {
+      httpOnly: true,
+      sameSite: 'lax',
+      path: '/',
+      secure: process.env.NODE_ENV === 'production',
+    },
+  },
+}
+```
+
+3. **CORS Issues:**
+```typescript
+// Add CORS headers in next.config.mjs
+async headers() {
+  return [
+    {
+      source: '/api/:path*',
+      headers: [
+        { key: 'Access-Control-Allow-Origin', value: '*' },
+        { key: 'Access-Control-Allow-Methods', value: 'GET,POST,PUT,DELETE' },
+        { key: 'Access-Control-Allow-Headers', value: 'Content-Type,Authorization' },
+      ],
+    },
+  ];
+}
+```
+
+### Database Connection Issues
+
+**Problem:** Database queries fail or connection is refused.
+
+**Solutions:**
+
+1. **Check Connection String:**
+```bash
+# Verify DATABASE_URL format
+# PostgreSQL: postgresql://username:password@localhost:5432/dbname
+# MySQL: mysql://username:password@localhost:3306/dbname
+```
+
+2. **Connection Pool Issues:**
+```typescript
+// Increase connection pool size
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 20, // Increase pool size
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
+});
+```
+
+3. **SSL Issues:**
+```typescript
+// For production databases requiring SSL
+const client = new Client({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+});
+```
+
+### Socket.IO Connection Issues
+
+**Problem:** Real-time features not working.
+
+**Solutions:**
+
+1. **Check Server Configuration:**
+```typescript
+// Ensure CORS is properly configured
+const io = new Server(server, {
+  cors: {
+    origin: process.env.NODE_ENV === 'production' 
+      ? 'https://yourdomain.com' 
+      : 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+  },
+});
+```
+
+2. **Client Connection Issues:**
+```typescript
+// Add connection error handling
+const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL, {
+  transports: ['websocket', 'polling'],
+  timeout: 20000,
+  forceNew: true,
+});
+
+socket.on('connect_error', (error) => {
+  console.error('Socket connection error:', error);
+});
+```
+
+3. **Firewall/Proxy Issues:**
+```bash
+# Test direct connection
+curl -v http://localhost:4000/socket.io/
+
+# Check if WebSocket upgrade works
+wscat -c ws://localhost:4000/socket.io/?EIO=4&transport=websocket
+```
+
+## Deployment Issues
+
+### Vercel Deployment Problems
+
+**Problem:** Deployment fails or app doesn't work in production.
+
+**Solutions:**
+
+1. **Environment Variables:**
+```bash
+# Set environment variables in Vercel dashboard
+# Or use Vercel CLI
+vercel env add NEXTAUTH_SECRET production
+vercel env add DATABASE_URL production
+```
+
+2. **Build Command Issues:**
+```json
+// vercel.json
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "installCommand": "npm ci"
+}
+```
+
+3. **Function Timeout:**
+```json
+// vercel.json
+{
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  }
+}
+```
+
+### Docker Deployment Issues
+
+**Problem:** Docker build fails or container won't start.
+
+**Solutions:**
+
+1. **Multi-stage Build Issues:**
+```dockerfile
+# Ensure proper file copying
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copy source files
+COPY . .
+RUN npm run build
+```
+
+2. **Permission Issues:**
+```dockerfile
+# Set proper user permissions
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+USER nextjs
+```
+
+3. **Port Binding:**
+```dockerfile
+# Expose correct port
+EXPOSE 3000
+ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
+```
+
+### SSL Certificate Issues
+
+**Problem:** HTTPS not working or certificate errors.
+
+**Solutions:**
+
+1. **Let's Encrypt Setup:**
+```bash
+# Install Certbot
+sudo apt install certbot python3-certbot-nginx
+
+# Obtain certificate
+sudo certbot --nginx -d yourdomain.com
+
+# Test renewal
+sudo certbot renew --dry-run
+```
+
+2. **Nginx Configuration:**
+```nginx
+server {
+    listen 443 ssl http2;
+    server_name yourdomain.com;
+    
+    ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
+    
+    # Modern SSL configuration
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512;
+}
+```
+
+## Performance Issues
+
+### Slow Page Load Times
+
+**Problem:** Pages take too long to load.
+
+**Solutions:**
+
+1. **Image Optimization:**
+```typescript
+// Use Next.js Image component
+import Image from 'next/image';
+
+<Image
+  src="/image.jpg"
+  alt="Description"
+  width={800}
+  height={600}
+  placeholder="blur"
+  blurDataURL="data:image/jpeg;base64,..."
+/>
+```
+
+2. **Code Splitting:**
+```typescript
+// Dynamic imports for heavy components
+const HeavyComponent = dynamic(() => import('./HeavyComponent'), {
+  loading: () => <p>Loading...</p>,
+  ssr: false, // Disable SSR if not needed
+});
+```
+
+3. **Caching Strategy:**
+```typescript
+// Add caching headers
+export async function GET() {
+  const data = await fetchData();
+  
+  return new Response(JSON.stringify(data), {
+    headers: {
+      'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+    },
+  });
+}
+```
+
+### Memory Leaks
+
+**Problem:** Application memory usage keeps increasing.
+
+**Solutions:**
+
+1. **Event Listener Cleanup:**
+```typescript
+useEffect(() => {
+  const handleResize = () => {
+    // Handle resize
+  };
+  
+  window.addEventListener('resize', handleResize);
+  
+  // Cleanup
+  return () => {
+    window.removeEventListener('resize', handleResize);
+  };
+}, []);
+```
+
+2. **Socket Cleanup:**
+```typescript
+useEffect(() => {
+  const socket = io();
+  
+  socket.on('message', handleMessage);
+  
+  return () => {
+    socket.off('message', handleMessage);
+    socket.disconnect();
+  };
+}, []);
+```
+
+3. **Query Cleanup:**
+```typescript
+// Set proper cache times for React Query
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      cacheTime: 10 * 60 * 1000, // 10 minutes
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+```
+
+## Getting Help
+
+### Debug Information
+
+When reporting issues, include:
+
+1. **System Information:**
+```bash
+# Node.js version
+node --version
+
+# npm version
+npm --version
+
+# Operating system
+uname -a  # Linux/macOS
+systeminfo  # Windows
+```
+
+2. **Package Versions:**
+```bash
+# List installed packages
+npm list --depth=0
+
+# Check specific package version
+npm list next react typescript
+```
+
+3. **Error Logs:**
+```bash
+# Development logs
+npm run dev 2>&1 | tee dev.log
+
+# Build logs
+npm run build 2>&1 | tee build.log
+
+# Browser console errors (copy from DevTools)
+```
+
+### Community Resources
+
+- **GitHub Issues**: [Report bugs and request features](https://github.com/zahidrahimoon/next-starter/issues)
+- **Discord Community**: Join our Discord server for real-time help
+- **Stack Overflow**: Tag questions with `nextjs-enterprise-starter`
+- **Documentation**: Check this documentation for detailed guides
+
+### Professional Support
+
+For enterprise customers, we offer:
+- Priority support tickets
+- Custom implementation assistance
+- Performance optimization consulting
+- Training and onboarding sessions
+
+Contact us at support@nextjs-enterprise-starter.com for more information.
+
+## Preventive Measures
+
+### Code Quality
+
+1. **Use TypeScript Strict Mode:**
+```json
+// tsconfig.json
+{
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true
+  }
+}
+```
+
+2. **Set Up Pre-commit Hooks:**
+```bash
+# Install husky
+npm install --save-dev husky
+
+# Add pre-commit hook
+npx husky add .husky/pre-commit "npm run lint && npm run type-check"
+```
+
+3. **Regular Dependency Updates:**
+```bash
+# Check for outdated packages
+npm outdated
+
+# Update dependencies
+npm update
+
+# Use automated tools
+npx npm-check-updates -u
+```
+
+### Monitoring
+
+1. **Error Tracking:**
+```typescript
+// Add error boundary
+class ErrorBoundary extends Component {
+  componentDidCatch(error, errorInfo) {
+    // Send to error tracking service
+    console.error('Error caught by boundary:', error, errorInfo);
+  }
+}
+```
+
+2. **Performance Monitoring:**
+```typescript
+// Web Vitals tracking
+import { getCLS, getFID, getFCP, getLCP, getTTFB } from 'web-vitals';
+
+getCLS(console.log);
+getFID(console.log);
+getFCP(console.log);
+getLCP(console.log);
+getTTFB(console.log);
+```
+
+By following these troubleshooting guidelines and preventive measures, you can avoid most common issues and quickly resolve any problems that do arise.

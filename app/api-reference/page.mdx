@@ -1,0 +1,614 @@
+# API Reference
+
+Complete API reference for the Next.js Enterprise Starter Kit, including hooks, components, utilities, and configuration options.
+
+## Hooks
+
+### useAuth
+
+Authentication hook for managing user state and authentication actions.
+
+```typescript
+interface UseAuthReturn {
+  user: User | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  login: (credentials: LoginCredentials) => Promise<void>;
+  logout: () => Promise<void>;
+  register: (userData: RegisterData) => Promise<void>;
+  updateProfile: (data: Partial<User>) => Promise<void>;
+  refreshToken: () => Promise<void>;
+}
+
+const useAuth = (): UseAuthReturn
+```
+
+**Example:**
+```typescript
+const { user, login, logout, isAuthenticated } = useAuth();
+
+const handleLogin = async () => {
+  try {
+    await login({ email: 'user@example.com', password: 'password' });
+  } catch (error) {
+    console.error('Login failed:', error);
+  }
+};
+```
+
+### useLayout
+
+Layout management hook for controlling application layout configuration.
+
+```typescript
+interface UseLayoutReturn {
+  layout: LayoutConfig;
+  setLayout: (preset: LayoutPreset) => void;
+  updateLayout: (config: Partial<LayoutConfig>) => void;
+  toggleSidebar: () => void;
+  collapseSidebar: (collapsed: boolean) => void;
+}
+
+const useLayout = (): UseLayoutReturn
+```
+
+**Example:**
+```typescript
+const { layout, setLayout, toggleSidebar } = useLayout();
+
+// Switch to dashboard layout
+setLayout('dashboard');
+
+// Toggle sidebar
+toggleSidebar();
+```
+
+### useSocket
+
+Socket.IO hook for real-time communication.
+
+```typescript
+interface UseSocketReturn {
+  socket: Socket | null;
+  isConnected: boolean;
+  emit: (event: string, data?: any) => void;
+  on: (event: string, handler: Function) => void;
+  off: (event: string, handler?: Function) => void;
+}
+
+const useSocket = (namespace?: string): UseSocketReturn
+```
+
+**Example:**
+```typescript
+const { socket, isConnected, emit, on } = useSocket();
+
+useEffect(() => {
+  if (isConnected) {
+    on('message', handleMessage);
+    return () => off('message', handleMessage);
+  }
+}, [isConnected]);
+
+const sendMessage = (message: string) => {
+  emit('send-message', { content: message });
+};
+```
+
+### useForm
+
+Enhanced form hook with validation and error handling.
+
+```typescript
+interface UseFormReturn<T> {
+  register: (name: keyof T) => RegisterReturn;
+  handleSubmit: (onSubmit: (data: T) => void) => FormEventHandler;
+  formState: FormState<T>;
+  setValue: (name: keyof T, value: any) => void;
+  getValues: () => T;
+  reset: (data?: Partial<T>) => void;
+  watch: (name?: keyof T) => any;
+}
+
+const useForm = <T>(options: UseFormOptions<T>): UseFormReturn<T>
+```
+
+**Example:**
+```typescript
+const form = useForm({
+  schema: userSchema,
+  defaultValues: { name: '', email: '' },
+});
+
+const onSubmit = (data: UserData) => {
+  console.log('Form data:', data);
+};
+
+return (
+  <form onSubmit={form.handleSubmit(onSubmit)}>
+    <input {...form.register('name')} />
+    <input {...form.register('email')} />
+  </form>
+);
+```
+
+### useApi
+
+API client hook with caching and error handling.
+
+```typescript
+interface UseApiReturn<T> {
+  data: T | null;
+  loading: boolean;
+  error: Error | null;
+  refetch: () => Promise<void>;
+  mutate: (data: Partial<T>) => Promise<T>;
+}
+
+const useApi = <T>(endpoint: string, options?: ApiOptions): UseApiReturn<T>
+```
+
+**Example:**
+```typescript
+const { data: users, loading, error, refetch } = useApi('/api/users');
+
+if (loading) return <LoadingSpinner />;
+if (error) return <ErrorMessage error={error} />;
+
+return (
+  <div>
+    {users?.map(user => (
+      <UserCard key={user.id} user={user} />
+    ))}
+  </div>
+);
+```
+
+## Components
+
+### BaseForm
+
+Universal form component with automatic validation and field generation.
+
+```typescript
+interface BaseFormProps<T> {
+  schema: ZodSchema<T>;
+  fields: FieldConfig[];
+  onSubmit: (data: T) => void | Promise<void>;
+  defaultValues?: Partial<T>;
+  layout?: 'vertical' | 'horizontal' | 'grid';
+  sections?: SectionConfig[];
+  submitText?: string;
+  loading?: boolean;
+  className?: string;
+}
+
+const BaseForm = <T>(props: BaseFormProps<T>) => JSX.Element
+```
+
+**Props:**
+- `schema`: Zod validation schema
+- `fields`: Array of field configurations
+- `onSubmit`: Form submission handler
+- `defaultValues`: Initial form values
+- `layout`: Form layout style
+- `sections`: Form sections for organization
+- `submitText`: Submit button text
+- `loading`: Loading state
+- `className`: Additional CSS classes
+
+**Example:**
+```typescript
+<BaseForm
+  schema={userSchema}
+  fields={userFields}
+  onSubmit={handleSubmit}
+  layout="grid"
+  submitText="Create User"
+/>
+```
+
+### DataTable
+
+Advanced data table with sorting, filtering, and pagination.
+
+```typescript
+interface DataTableProps<T> {
+  data: T[];
+  columns: ColumnDef<T>[];
+  pagination?: PaginationConfig;
+  sorting?: SortingConfig;
+  filtering?: FilteringConfig;
+  selection?: SelectionConfig;
+  loading?: boolean;
+  className?: string;
+}
+
+const DataTable = <T>(props: DataTableProps<T>) => JSX.Element
+```
+
+**Props:**
+- `data`: Array of data objects
+- `columns`: Column definitions
+- `pagination`: Pagination configuration
+- `sorting`: Sorting configuration
+- `filtering`: Filtering configuration
+- `selection`: Row selection configuration
+- `loading`: Loading state
+- `className`: Additional CSS classes
+
+**Example:**
+```typescript
+<DataTable
+  data={users}
+  columns={userColumns}
+  pagination={{ pageSize: 10 }}
+  sorting={{ enabled: true }}
+  filtering={{ enabled: true }}
+/>
+```
+
+### Modal
+
+Flexible modal component with various configurations.
+
+```typescript
+interface ModalProps {
+  open: boolean;
+  onClose: () => void;
+  title?: string;
+  description?: string;
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  closable?: boolean;
+  footer?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}
+
+const Modal = (props: ModalProps) => JSX.Element
+```
+
+**Props:**
+- `open`: Modal visibility state
+- `onClose`: Close handler
+- `title`: Modal title
+- `description`: Modal description
+- `size`: Modal size
+- `closable`: Whether modal can be closed
+- `footer`: Custom footer content
+- `children`: Modal content
+- `className`: Additional CSS classes
+
+**Example:**
+```typescript
+<Modal
+  open={isOpen}
+  onClose={() => setIsOpen(false)}
+  title="Confirm Action"
+  size="md"
+>
+  <p>Are you sure you want to delete this item?</p>
+</Modal>
+```
+
+### Toast
+
+Toast notification system for user feedback.
+
+```typescript
+interface ToastOptions {
+  title?: string;
+  description?: string;
+  variant?: 'default' | 'success' | 'error' | 'warning';
+  duration?: number;
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
+}
+
+interface ToastAPI {
+  success: (message: string, options?: ToastOptions) => void;
+  error: (message: string, options?: ToastOptions) => void;
+  warning: (message: string, options?: ToastOptions) => void;
+  info: (message: string, options?: ToastOptions) => void;
+  dismiss: (id?: string) => void;
+}
+
+const toast: ToastAPI
+```
+
+**Example:**
+```typescript
+// Success toast
+toast.success('User created successfully');
+
+// Error toast with action
+toast.error('Failed to save', {
+  action: {
+    label: 'Retry',
+    onClick: () => handleRetry(),
+  },
+});
+
+// Custom toast
+toast.info('Processing...', {
+  duration: 5000,
+  description: 'This may take a few moments',
+});
+```
+
+## Utilities
+
+### API Client
+
+Pre-configured Axios client with interceptors.
+
+```typescript
+interface ApiClient {
+  get: <T>(url: string, config?: AxiosRequestConfig) => Promise<T>;
+  post: <T>(url: string, data?: any, config?: AxiosRequestConfig) => Promise<T>;
+  put: <T>(url: string, data?: any, config?: AxiosRequestConfig) => Promise<T>;
+  patch: <T>(url: string, data?: any, config?: AxiosRequestConfig) => Promise<T>;
+  delete: <T>(url: string, config?: AxiosRequestConfig) => Promise<T>;
+}
+
+const apiClient: ApiClient
+```
+
+**Example:**
+```typescript
+// GET request
+const users = await apiClient.get<User[]>('/api/users');
+
+// POST request
+const newUser = await apiClient.post<User>('/api/users', userData);
+
+// Error handling
+try {
+  await apiClient.delete(`/api/users/${userId}`);
+} catch (error) {
+  console.error('Delete failed:', error);
+}
+```
+
+### Validation Schemas
+
+Pre-built Zod schemas for common use cases.
+
+```typescript
+// User schemas
+const loginSchema: ZodSchema<LoginCredentials>
+const registerSchema: ZodSchema<RegisterData>
+const userProfileSchema: ZodSchema<UserProfile>
+
+// Form schemas
+const contactFormSchema: ZodSchema<ContactForm>
+const feedbackSchema: ZodSchema<Feedback>
+
+// Common field schemas
+const emailSchema: ZodSchema<string>
+const passwordSchema: ZodSchema<string>
+const phoneSchema: ZodSchema<string>
+```
+
+**Example:**
+```typescript
+import { loginSchema, userProfileSchema } from '@/lib/validations';
+
+// Validate login data
+const loginData = loginSchema.parse(formData);
+
+// Validate user profile
+const profileData = userProfileSchema.parse(userData);
+```
+
+### Utility Functions
+
+Common utility functions for data manipulation and formatting.
+
+```typescript
+// Class name utility
+const cn = (...classes: (string | undefined | null | boolean)[]) => string
+
+// Date formatting
+const formatDate = (date: Date | string, format?: string) => string
+const formatRelativeTime = (date: Date | string) => string
+
+// Number formatting
+const formatCurrency = (amount: number, currency?: string) => string
+const formatNumber = (number: number, options?: Intl.NumberFormatOptions) => string
+
+// String utilities
+const truncate = (text: string, length: number) => string
+const slugify = (text: string) => string
+const capitalize = (text: string) => string
+
+// Object utilities
+const omit = <T, K extends keyof T>(obj: T, keys: K[]) => Omit<T, K>
+const pick = <T, K extends keyof T>(obj: T, keys: K[]) => Pick<T, K>
+const deepMerge = <T>(target: T, source: Partial<T>) => T
+```
+
+**Example:**
+```typescript
+import { cn, formatDate, formatCurrency } from '@/lib/utils';
+
+// Combine class names
+const className = cn('base-class', isActive && 'active', 'additional-class');
+
+// Format date
+const formattedDate = formatDate(new Date(), 'MMM dd, yyyy');
+
+// Format currency
+const price = formatCurrency(1234.56, 'USD'); // "$1,234.56"
+```
+
+## Configuration
+
+### Layout Configuration
+
+```typescript
+interface LayoutConfig {
+  header: {
+    enabled: boolean;
+    fixed: boolean;
+    height: 'sm' | 'md' | 'lg';
+    showLogo: boolean;
+    showNavigation: boolean;
+    showUserMenu: boolean;
+    showSearch: boolean;
+    collapsible: boolean;
+  };
+  sidebar: {
+    enabled: boolean;
+    position: 'left' | 'right';
+    variant: 'fixed' | 'drawer' | 'overlay';
+    width: 'sm' | 'md' | 'lg' | 'xl';
+    collapsible: boolean;
+    defaultCollapsed: boolean;
+    showOnMobile: boolean;
+  };
+  footer: {
+    enabled: boolean;
+    fixed: boolean;
+    showLinks: boolean;
+    showCopyright: boolean;
+  };
+  content: {
+    maxWidth: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
+    padding: 'sm' | 'md' | 'lg';
+  };
+}
+```
+
+### Theme Configuration
+
+```typescript
+interface ThemeConfig {
+  colors: {
+    primary: string;
+    secondary: string;
+    accent: string;
+    background: string;
+    foreground: string;
+    muted: string;
+    border: string;
+  };
+  fonts: {
+    sans: string[];
+    mono: string[];
+  };
+  spacing: Record<string, string>;
+  borderRadius: Record<string, string>;
+  shadows: Record<string, string>;
+}
+```
+
+### API Configuration
+
+```typescript
+interface ApiConfig {
+  baseURL: string;
+  timeout: number;
+  retries: number;
+  retryDelay: number;
+  headers: Record<string, string>;
+  interceptors: {
+    request: RequestInterceptor[];
+    response: ResponseInterceptor[];
+  };
+}
+```
+
+## Type Definitions
+
+### User Types
+
+```typescript
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  avatar?: string;
+  role: UserRole;
+  permissions: Permission[];
+  preferences: UserPreferences;
+  createdAt: string;
+  updatedAt: string;
+}
+
+type UserRole = 'admin' | 'user' | 'moderator';
+
+interface Permission {
+  resource: string;
+  actions: ('create' | 'read' | 'update' | 'delete')[];
+}
+
+interface UserPreferences {
+  theme: 'light' | 'dark' | 'system';
+  language: string;
+  notifications: NotificationSettings;
+}
+```
+
+### Form Types
+
+```typescript
+interface FieldConfig {
+  name: string;
+  type: FieldType;
+  label: string;
+  placeholder?: string;
+  required?: boolean;
+  disabled?: boolean;
+  validation?: ZodSchema;
+  options?: OptionConfig[];
+  conditional?: ConditionalConfig;
+  grid?: GridConfig;
+}
+
+type FieldType = 
+  | 'text' | 'email' | 'password' | 'textarea'
+  | 'select' | 'multiselect' | 'checkbox' | 'radio'
+  | 'date' | 'datetime' | 'time'
+  | 'file' | 'image'
+  | 'number' | 'currency' | 'percentage';
+
+interface SectionConfig {
+  title: string;
+  description?: string;
+  fields: string[];
+  collapsible?: boolean;
+  defaultCollapsed?: boolean;
+}
+```
+
+### API Types
+
+```typescript
+interface ApiResponse<T> {
+  data: T;
+  message?: string;
+  status: number;
+  timestamp: string;
+}
+
+interface PaginatedResponse<T> extends ApiResponse<T[]> {
+  pagination: {
+    page: number;
+    size: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+interface ApiError {
+  message: string;
+  code?: string;
+  details?: any;
+  status: number;
+}
+```
+
+This API reference provides comprehensive documentation for all the hooks, components, utilities, and types available in the Next.js Enterprise Starter Kit. Use this as a quick reference while developing your application.
