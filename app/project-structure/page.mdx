@@ -1,0 +1,133 @@
+---
+title: "Project Structure"
+description: "Overview of the Next.js Enterprise Starter Kit project structure and conventions"
+---
+
+import { Callout } from 'nextra/components'
+
+# Project Structure
+
+This explains the purpose, structure, and conventions of the **Next.js Enterprise Starter Kit**. It is intended for contributors, maintainers, and teams building production-ready Next.js applications.
+
+## High-Level Technologies
+
+- Next.js 15 (App Router + server components)  
+- React 18  
+- TypeScript  
+- TailwindCSS 4  
+- Storybook  
+- Jest / Vitest  
+- Redux Toolkit  
+- React Query  
+- Socket.io  
+- i18n (next-intl)  
+- Zod (validation)  
+- Pino (logging)  
+
+---
+
+## Top-Level Files
+
+| File | Purpose |
+|------|---------|
+| `package.json` | Scripts and dependencies |
+| `tsconfig.json`, `next-env.d.ts` | TypeScript configuration |
+| `next.config.mjs` | Next.js configuration |
+| `postcss.config.cjs`, `tailwind.config.*` | TailwindCSS setup |
+| `jest.config.ts`, `vitest.config.ts` | Test runner configs |
+| `middleware.ts` | Next.js middleware |
+| `README.md` | Project README |
+| `PROJECT_STRUCTURE.md` | This file |
+
+---
+
+## Folder Structure
+
+### `app/`
+Next.js App Router pages and layouts.
+
+- `globals.css` — global styles  
+- `[locale]/` — localized route roots  
+- Folders like `dashboard`, `home`, `users`, 
+
+### `components/`
+Shared React components.
+
+- `form/` — base form wrappers and fields  
+- `layout/` — header, footer, sidebar  
+- `shared/` — utilities, modals, loaders, tables
+- `ui/` — shadcn/ui-based components
+
+### `contexts/`
+React Context providers for global state.
+
+- Examples: `error-context.tsx`, `global-loading-context.tsx` , `layout-context.tsx`
+
+### `hooks/`
+Reusable hooks (e.g., `use-auth.ts`, `use-toast.ts`)
+
+### `i18n/`
+Internationalization utilities and message catalogs.
+
+### `lib/`
+Shared utilities and helpers.
+
+- `actions/` — server or background actions  
+- `axios/`, `cookie/` — HTTP/cookie helpers  
+- `utils.ts`, `error-factory.ts`, `icons.ts` — generic helpers
+
+### `logger/`
+Pino logging configuration
+
+### `providers/`
+App-level React providers (theme, state, analytics)
+
+### `redux/`
+Redux store and slices
+
+### `socket/`
+Socket.io client wrappers
+
+### `validations/`
+Input and schema validation (Zod)
+
+### `public/`
+Static assets
+
+### `__tests__/`
+Unit, integration, and e2e tests
+
+---
+
+## Important Scripts
+
+```bash
+npm run dev        # Start dev server
+npm run build      # Build production bundle
+npm run start      # Start production server
+npm run lint       # Lint code
+npm run format     # Format code
+npm run test       # Run all tests
+npm run storybook  # Start Storybook
+```
+
+<Callout type="note">
+💡 The repo uses **Husky + lint-staged** to format staged files on commit. Ensure `npm run prepare` runs on first install.
+</Callout>
+
+---
+
+## Conventions and Architecture Notes
+
+- TypeScript-first: Always type props and return types  
+- Component composition preferred over large prop interfaces  
+- TailwindCSS utilities; extract repeated patterns using helpers  
+- Redux for global state, React Query for server-side data  
+- Side effects in hooks or actions, not in components  
+- Write tests: unit → integration → e2e
+
+
+
+<Callout type="tip">
+🚀 This boilerplate is **opinionated but flexible**. Keep documentation, Storybook, and folder structure consistent as your app grows.
+</Callout>

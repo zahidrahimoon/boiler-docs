@@ -1,93 +1,98 @@
+---
+title: "Introduction"
+description: "Overview of the Next.js Enterprise Starter Boilerplate"
+---
+
 # Next.js Enterprise Starter Kit
 
-A production-ready Next.js 15 starter template with advanced dynamic layout system, comprehensive form handling, real-time features, and enterprise-grade architecture. Built with TypeScript, Tailwind CSS 4, and modern React patterns.
+<div className="bg-[#0A0A0A] border border-neutral-800 text-slate-200 p-8 rounded-xl shadow-xl leading-relaxed"> 
+
+A **production‑grade**, **scalable**, and **enterprise‑oriented** boilerplate built with **Next.js 15**, **TypeScript**, **Tailwind CSS 4**, **shadcn/ui**, **Redux Toolkit**, and **React Query**. Designed to support multilingual, real‑time, authenticated applications with a strong emphasis on maintainability, architecture, and long‑term developer experience.
+
+This boilerplate delivers a fully modular foundation, enabling teams to build complex systems with confidence, performance consistency, and architectural clarity.
 
 ## Key Features
 
-- **Dynamic Layout System**: Fully configurable layout engine with multiple variants
-- **Advanced Form Builder**: Type-safe forms with 20+ field types and dynamic validation
-- **Real-time Dashboard**: Live updates with Socket.IO and WebSocket support
-- **Enterprise Authentication**: Complete auth flow with role-based access control
-- **Modern UI Components**: 50+ shadcn/ui components with custom theming
-- **State Management**: Redux Toolkit with persistence and React Query integration
-- **Testing Suite**: Unit, integration, and E2E testing setup
-- **Performance Optimized**: Server components, lazy loading, and bundle optimization
-- **Storybook Integration**: Isolated component development with client-side logging via Pino
-- **Local Socket.IO Testing**: Dedicated Express.js test server for real-time feature validation
+### Enterprise-Ready Architecture
+- Modular, domain-driven folder structure
+- Full support for the **Next.js App Router**
+- Component-driven development with Storybook
+- Optimized bundling with lazy loading and code splitting
 
-## Tech Stack
+### Dynamic Layout System
+- Two refined layout modes: **Website** and **Dashboard**
+- Fully responsive, mobile-first design
+- Native RTL support (Arabic, Urdu, Persian)
+- Layout state persistence via localStorage
 
-<p align="left">
-<a href="https://nextjs.org" target="_blank"><img alt="Next.js" src="https://img.shields.io/badge/Next.js-15.5.4-black?logo=next.js&logoColor=white"/></a>
-<a href="https://react.dev" target="_blank"><img alt="React" src="https://img.shields.io/badge/React-18-20232A?logo=react&logoColor=61DAFB"/></a>
-<a href="https://www.typescriptlang.org/" target="_blank"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white"/></a>
-<a href="https://tailwindcss.com" target="_blank"><img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind%20CSS-4.1.9-06B6D4?logo=tailwindcss&logoColor=white"/></a>
-<a href="https://ui.shadcn.com" target="_blank"><img alt="shadcn/ui" src="https://img.shields.io/badge/shadcn%2Fui-Components-000000"/></a>
-<a href="https://www.radix-ui.com/" target="_blank"><img alt="Radix UI" src="https://img.shields.io/badge/Radix%20UI-Primitives-161618?logo=radixui&logoColor=white"/></a>
-<a href="https://redux-toolkit.js.org/" target="_blank"><img alt="Redux Toolkit" src="https://img.shields.io/badge/Redux%20Toolkit-Store-764ABC?logo=redux&logoColor=white"/></a>
-<a href="https://tanstack.com/query/latest" target="_blank"><img alt="React Query" src="https://img.shields.io/badge/TanStack%20Query-React-FF4154?logo=reactquery&logoColor=white"/></a>
-<a href="https://zod.dev" target="_blank"><img alt="Zod" src="https://img.shields.io/badge/Zod-Validation-3E67B1"/></a>
-<a href="https://react-hook-form.com" target="_blank"><img alt="React Hook Form" src="https://img.shields.io/badge/React%20Hook%20Form-Forms-EC5990?logo=reacthookform&logoColor=white"/></a>
-<a href="https://axios-http.com" target="_blank"><img alt="Axios" src="https://img.shields.io/badge/Axios-HTTP%20Client-5A29E4?logo=axios&logoColor=white"/></a>
-<a href="https://socket.io" target="_blank"><img alt="Socket.IO" src="https://img.shields.io/badge/Socket.IO-Realtime-010101?logo=socketdotio&logoColor=white"/></a>
-<a href="https://sonner.emilkowal.ski" target="_blank"><img alt="Sonner" src="https://img.shields.io/badge/Sonner-Toasts-000000"/></a>
-<a href="https://storybook.js.org" target="_blank"><img alt="Storybook" src="https://img.shields.io/badge/Storybook-7-EBAC2B?logo=storybook&logoColor=black"/></a>
-<a href="https://getpino.io" target="_blank"><img alt="Pino" src="https://img.shields.io/badge/Pino-Logging-5A29E4?logo=node.js&logoColor=white"/></a>
-</p>
+### Robust Authentication System
+- Full auth suite: login, signup, OTP, forgot password, reset password
+- Secure cookie-based session handling
+- Flow-validated OTP and password reset routes
+- Middleware-driven route protection at the **page level**
 
-## What Makes This Different?
+### Real-Time Capabilities
+- Native **Socket.IO** and WebSocket integration
+- Local Express server provided for real-time testing
+- Automatic reconnection, typed events, and error recovery
 
-This isn't just another Next.js template. It's a comprehensive enterprise solution that includes:
+### Internationalization (i18n)
+- Locale-based routing using the App Router
+- RTL/LTR adaptive styling baked into the system
+- JSON-based translation dictionaries
 
-### Production-Ready Architecture
-- **Scalable folder structure** with clear separation of concerns
-- **Type-safe APIs** with full TypeScript integration
-- **Error boundaries** and comprehensive error handling
-- **Performance monitoring** and optimization tools
+### UI System (50+ Components)
+- Built with **shadcn/ui** and **Radix UI** primitives
+- Theme-driven, token-based styling via Tailwind CSS 4
+- Includes enterprise utilities: Data Table, Scroll-to-Top, Error Boundaries
 
-### Advanced Features
-- **Dynamic layouts** that adapt to different use cases
-- **Real-time capabilities** with Socket.IO and WebSocket support
-- **Form builder** with complex validation and conditional logic
-- **State management** with Redux Toolkit and React Query
+</div>
 
-### Developer Experience
-- **Storybook integration** for component development
-- **Comprehensive testing** setup with Jest and Testing Library
-- **ESLint and Prettier** configuration
-- **Hot reload** and fast refresh for rapid development
+## Why This Boilerplate?
 
-## Quick Start
+### Superior Developer Experience
+- Strict TypeScript mode for safer production builds
+- ESLint + Prettier enforced coding standards
+- Clear separation of concerns across modules
+- Pluggable architecture for forms, layouts, networking, and state management
 
-Get up and running in minutes:
+### Production-Level Performance
+- React Query caching and request deduplication
+- Server components for reduced bundle size
+- Optimized icon and asset loading
+- Virtualized data tables for heavy datasets
 
-```bash
-git clone https://github.com/zahidrahimoon/next-starter.git
-cd nextjs-starter
-npm install
-npm run dev
-```
+### Enterprise Scalability
+- Designed for multi-team development
+- Extensible layout and authentication systems
+- Comprehensive folder conventions for CI/CD readiness
 
-Open [http://localhost:3000](http://localhost:3000) to see your application running.
+## What You Can Build
 
-## Who Is This For?
+- SaaS platforms with complex user roles and permissions
+- Admin dashboards with real-time data visualization
+- Multi-language applications with RTL support
+- Enterprise-grade e-commerce back-offices
+- Form-intensive applications with dynamic validation
+- Real-time monitoring systems for live data tracking
 
-- **Enterprise teams** building scalable web applications
-- **Startups** needing a robust foundation for rapid development
-- **Developers** who want to learn modern React patterns
-- **Teams** looking for a production-ready starting point
 
-## What's Included?
+## Highlights
 
-- ✅ **Next.js 15** with App Router
-- ✅ **TypeScript** with strict configuration
-- ✅ **Tailwind CSS 4** with custom theming
-- ✅ **shadcn/ui** component library
-- ✅ **Redux Toolkit** for state management
-- ✅ **React Query** for server state
-- ✅ **Socket.IO** for real-time features
-- ✅ **Storybook** for component development
-- ✅ **Jest & Testing Library** for testing
-- ✅ **ESLint & Prettier** for code quality
+### Global Scroll-to-Top Component
+- Smart visibility threshold
+- RTL-aware auto-positioning
+- Smooth transitions and motion effects
+- Globally integrated in root layout
 
-Ready to build something amazing? Let's get started! 🚀
+### Advanced Form Builder
+- Schema-driven using Zod
+- 20+ reusable field components
+- Conditional logic and dynamic validation
+- Uniform enterprise-grade UI consistency
+
+### Real-Time Dashboard Ready
+- Socket.IO client pre-configured
+- Test server bundled with repository
+- Robust connection handling
+- Live metrics and event streaming support

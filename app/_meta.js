@@ -2,14 +2,6 @@
 export default {
   introduction: "Introduction",
   "getting-started": "Getting Started",
-  architecture: "Architecture",
-  "core-systems": "Core Systems",
-  development: "Development",
-  deployment: "Deployment",
-  "###": {
-    type: "separator",
-  },
-  examples: "Examples",
-  "api-reference": "API Reference",
-  troubleshooting: "Troubleshooting",
+  "project-structure": "Project Structure",
+  guide: "Guide",
 };

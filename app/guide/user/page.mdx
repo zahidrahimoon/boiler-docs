@@ -1,0 +1,254 @@
+---
+title: "User Module"
+description: "Full technical documentation for the User Module — Redux, API, UI, flows, and extension points"
+---
+
+import { Callout } from 'nextra/components'
+
+# User Module
+
+The **User Module** implements a robust CRUD workflow (list, detail, create, update, delete) built with Redux, React Query patterns, modular UI components, and server-side pagination.
+
+This document is designed for developers joining the project and provides a complete understanding of:
+
+- Architectural layout  
+- State & async thunks  
+- Data types  
+- Table & form UI  
+- How data flows end-to-end  
+- How to extend the module  
+- Testing strategy  
+
+It intentionally favors clarity and detail suitable for enterprise environments.
+
+---
+
+# 1. Module Purpose
+
+The User module handles:
+
+- Fetching users (paginated, filterable, searchable)
+- Fetching individual user details
+- Creating new users
+- Updating existing users
+- Deleting users
+- Displaying and filtering users via a configurable `UserTable`
+- Showing modal-based forms built using `BaseForm`
+
+<Callout type="note">
+This module follows the project’s domain-first architecture: all logic for users (state, types, API calls, UI) stays fully scoped in the `/users` folder tree.
+</Callout>
+
+---
+
+# 2. Where the Code Lives
+
+**Primary folders and files:**
+
+### **Redux Layer**
+- `redux/slices/user-slice.ts`  
+  Contains slice state, reducers, and all async thunks.
+
+### **Types**
+- `app/[locale]/users/types/user.ts`  
+  Shared TypeScript types for user entities, API requests, and list params.
+
+### **UI Components**
+- `app/[locale]/users/page.tsx`  
+  Entry point for the user list page (queries, layout, dispatching fetch).
+- `components/user-table/index.tsx`  
+  Main `UserTable` component.
+- `components/user-table/columns.tsx`  
+  Table column definitions using TanStack Table.
+- `components/user-table/user-table-action.tsx`  
+  Search bar, filters, and “Create User” button.
+- `components/user-forms/*`  
+  Create/edit/detail modals and forms.
+
+---
+
+# 3. Full Data Flow Diagram
+
+This is the core flow developers must understand.
+
+```
+                  ┌──────────────────────────────┐
+                  │   User navigates to /users    │
+                  └───────────────┬──────────────┘
+                                  │
+                                  ▼
+                    ┌────────────────────────────────┐
+                    │   page.tsx (User Page Entry)   │
+                    │ - sets layout: dashboard       │
+                    │ - reads query params           │
+                    │ - dispatch(fetchUsers)         │
+                    └───────────────┬────────────────┘
+                                    │
+                                    ▼
+                ┌────────────────────────────────────────────────┐
+                │             Redux Async Thunk                   │
+                │ fetchUsers(params) → axiosInstance GET /users  │
+                └───────────────┬────────────────────────────────┘
+                                │ response
+                                ▼
+       ┌──────────────────────────────────────────────────────────────┐
+       │                    Slice Reducers Update State               │
+       │ users[], pagination, filters, loading, error                 │
+       └───────────────┬──────────────────────────────────────────────┘
+                       │
+                       ▼
+       ┌──────────────────────────────────────────────────────────────┐
+       │                        UserTable Component                    │
+       │  - receives users + pagination                               │
+       │  - renders <UserTableActions/> + <DataTable/>                │
+       └───────────────┬──────────────────────────────────────────────┘
+                       │
+                       ▼
+     ┌────────────────────────────────────────────────────────────────────┐
+     │ Table Actions (edit/delete/view)                                   │
+     │ - open modal → fetchUserById(id)                                   │
+     │ - updateUser / deleteUser thunks                                   │
+     └────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+# 4. Redux Slice — Detailed Overview  
+**File:** `redux/slices/user-slice.ts`
+
+### **State Shape**
+```ts
+{
+  users: UserModuleUser[],
+  currentUser: UserModuleUser | null,
+  loading: boolean,
+  error: string | null,
+  pagination: { page, pages, total, count },
+  filters: UserListParams
+}
+```
+
+### **Async Thunks (API Operations)**
+
+| Thunk | HTTP | Purpose |
+|-------|------|---------|
+| `fetchUsers(params)` | GET `/users` | Retrieves paginated user list |
+| `fetchUserById(id)` | GET `/users/:id` | Fetches single user details |
+| `createUser(data)` | POST `/users` | Creates new user, prepends list |
+| `updateUser({ id, data })` | PUT `/users/:id` | Updates user in list + currentUser |
+| `deleteUser(id)` | DELETE `/users/:id` | Removes user from list |
+
+These thunks use `axiosInstance`, ensuring:
+
+- Base API URL consistency
+- Interceptors for token authentication
+- Centralized error handling
+
+---
+
+# 5. Types — Strong Contracts  
+**File:** `app/[locale]/users/types/user.ts`
+
+### **Entity Type**
+```ts
+export interface UserModuleUser {
+  id: string
+  name: string
+  email: string
+  avatar?: string
+  phone?: string
+  age?: number
+  gender?: "male" | "female" | "other"
+  address?: string
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+```
+
+### **API Shapes**
+- `CreateUserRequest`
+- `UpdateUserRequest`
+- `UserListParams`
+- `UserListResponse`
+
+These types enforce correctness across reducers, thunks, and UI.
+
+---
+
+# 6. UI Architecture
+
+### **User Table**
+**Location:** `user-table/index.tsx`
+
+Receives:
+
+```ts
+users
+page
+pageCount
+totalUsers
+```
+
+Internally renders:
+
+- `<UserTableActions />` – search, filter, create
+- `<DataTable columns={columns} data={users} />`
+
+### Columns Definition  
+In `columns.tsx`, each field is defined using TanStack’s `ColumnDef`:
+
+```ts
+{
+  accessorKey: "name",
+  header: "Name",
+  cell: ({ row }) => <span>{row.original.name}</span>
+}
+```
+
+### Row-Level Actions (Edit/Delete/View)
+`CellAction` dispatches:
+
+- `fetchUserById(id)`
+- `deleteUser(id)`
+- opens modals for edit/create/detail
+
+---
+
+# 7. Form System — Create & Edit User
+
+Forms follow the centralized system:
+
+- `BaseForm` — core renderer
+- `Zod` validation schemas
+- Field configs (id, name, type, label)
+
+### Benefits:
+- Uniform styling  
+- Reusable validation  
+- Built-in loading indicators  
+- Automatic error extraction  
+
+---
+
+# 8. Performance Considerations
+
+- Use server-side pagination (already implemented)
+- Keep rows lightweight
+- Lazy-load detail modal content via `fetchUserById`
+- Use search debounce (recommended enhancement)
+- Avoid storing large arrays in Redux unnecessarily
+
+---
+
+
+# Final Notes
+
+This module is designed for **extensibility**, **scalability**, and **clarity**.  
+All patterns follow enterprise best practices:
+
+- Domain-scoped foldering  
+- Strong typing  
+- Modular components  
+- Separation of concerns  
+- Server-aware data fetching  

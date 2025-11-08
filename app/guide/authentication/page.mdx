@@ -1,0 +1,246 @@
+---
+title: "Authentication Module"
+description: "Full technical guide to authentication architecture, flows, and developer workflows."
+---
+
+import { Callout } from 'nextra/components'
+
+## Authentication Module
+
+The authentication module in this boilerplate provides a complete, enterprise-grade authentication flow including login, signup, OTP verification, password reset, user state hydration, and server-enforced route protection.  
+It is built across **Redux**, **Axios**, **cookies**, **Next.js middleware**, **Zod**, and **centralized form components**.
+
+---
+
+### 1. High-Level Architecture
+
+Authentication consists of four tightly integrated layers:
+
+1. **Redux Layer** – Manages user state, tokens, loading, and async thunks.
+2. **Cookie Layer** – Stores tokens for server validation and hydration.
+3. **Client Hook (`useAuth`)** – Computes logged-in state.
+4. **Middleware Layer** – Protects routes at the server boundary.
+
+<Callout type="note">
+This hybrid client/server model ensures secure access control even before React hydrates.
+</Callout>
+
+---
+
+### 2. Authentication Flow Diagram
+
+A new developer should understand this before modifying anything.
+
+```
+                     ┌──────────────────────────────┐
+                     │         User Action           │
+                     │  (login/signup/reset/otp)     │
+                     └───────────────┬──────────────┘
+                                     │
+                                     ▼
+                      ┌────────────────────────────┐
+                      │       BaseForm UI Layer    │
+                      │  - collects input          │
+                      │  - Zod validates           │
+                      └───────────────┬────────────┘
+                                      │ onSubmit()
+                                      ▼
+                    ┌────────────────────────────────┐
+                    │       Redux Async Thunk        │
+                    │ loginUser / signupUser / etc.  │
+                    └───────────────┬────────────────┘
+                                    │ axiosInstance
+                                    ▼
+                   ┌───────────────────────────────────┐
+                   │         Backend Authentication     │
+                   │  - verifies credentials            │
+                   │  - issues token + user payload     │
+                   └───────────────┬────────────────────┘
+                                   │ response
+                                   ▼
+          ┌───────────────────────────────────────────────────────┐
+          │                 Cookie Persistence Layer               │
+          │   setToken() → auth_token                             │
+          │   set user cookies → user_logged_in, user_email, etc. │
+          └───────────────┬───────────────────────────────────────┘
+                          │
+                          ▼
+          ┌─────────────────────────────────┐
+          │         Redux Auth Slice        │
+          │  - stores user + token          │
+          │  - sets isAuthenticated = true  │
+          └───────────────┬─────────────────┘
+                          │
+                          ▼
+         ┌──────────────────────────────────────────────────────┐
+         │                 useAuth Client Hook                   │
+         │ - merges Redux + cookie fallback                     │
+         │ - polls cookies → keeps tabs in sync                 │
+         │ - returns { isAuthenticated, user, refreshAuth }     │
+         └───────────────┬──────────────────────────────────────┘
+                         │
+                         ▼
+             ┌──────────────────────────────┐
+             │        UI Rendering          │
+             │ Dashboard, Profile, Layouts  │
+             └───────────────┬──────────────┘
+                             │ navigation
+                             ▼
+         ┌─────────────────────────────────────────────────────┐
+         │               Next.js Middleware Guard               │
+         │  - runs before route loads                          │
+         │  - checks auth_token                                │
+         │  - restricts or redirects                          │
+         └─────────────────────────────────────────────────────┘
+```
+
+<Callout type="tip">
+The flow always begins in the **client** but access enforcement always ends in the **middleware**.
+</Callout>
+
+---
+
+### 3. Redux Auth Slice  
+**Location:** `redux/slices/auth-slice.ts`
+
+### State Structure
+```ts
+{
+  user: User | null,
+  token: string | null,
+  isAuthenticated: boolean,
+  isLoading: boolean,
+  error: string | null
+}
+```
+
+### Async Thunks
+- `loginUser`
+- `signupUser`
+- `googleAuth`
+- `logout`
+
+All thunks use `axiosInstance` and persist the token using `setToken()`.
+
+---
+
+### 4. Cookie System  
+**Location:** `lib/cookie/cookie.ts`
+
+### Cookies Used
+| Cookie Key | Purpose |
+|------------|---------|
+| `auth_token` | Main authentication token |
+| `user_logged_in` | Quick boolean fallback |
+| User metadata cookies | Name, email, avatar for hydration |
+
+### Helpers
+- `setToken(token)`
+- `getToken()`
+- `removeToken()`
+- `getUserFromCookies()`
+
+<Callout type="warning">
+Middleware reads cookies directly from the browser request — this is the authoritative truth for authentication.
+</Callout>
+
+---
+
+### 5. Client Auth Hook (`useAuth`)  
+**Location:** `hooks/use-auth.ts`
+
+### Responsibilities
+- Combine Redux + cookie fallback
+- Poll cookies every 2 seconds
+- Expose:
+```ts
+{
+  isAuthenticated,
+  user,
+  isLoading,
+  refreshAuth
+}
+```
+
+### Why polling?
+To keep auth synced across open tabs and during non-Redux page transitions.
+
+---
+
+# 6. Auth Pages & Form Architecture  
+**Directory:** `app/[locale]/(auth)/`
+
+Pages:
+- `login`
+- `signup`
+- `forgot`
+- `otp`
+- `reset`
+
+All built using:
+
+- `BaseForm` (consistent UI + validation)
+- Zod schemas (`validations/authValidation.ts`)
+- Form field definitions (`formFields`)
+- Centralized success & error toasts
+
+---
+
+# 7. Middleware-Based Route Protection  
+**Location:** `middleware.ts`
+
+### Server-side checks:
+- If `auth_token` missing → redirect to `/login`
+- If logged in → block access to `/(auth)` pages (login/signup)
+- OTP and Reset pages require valid `auth_flow` cookie
+- Dashboard and profile pages require authentication
+
+<Callout type="note">
+Middleware is what truly protects your application — not React components.
+</Callout>
+
+---
+
+# 8. AuthFlow (OTP / Reset Password)  
+Managed via `auth_flow` cookie:
+
+```ts
+{
+  step: "awaiting-otp" | "reset-password",
+  email: string,
+  timestamp: number
+}
+```
+
+Used by both client guards and middleware.
+
+---
+
+# 09. Removing Authentication Entirely
+
+1. Remove `auth-slice.ts` + slice registration  
+2. Remove cookie helpers  
+3. Delete all `(auth)` routes  
+4. Remove `middleware.ts` auth logic  
+5. Replace all `useAuth()` usage  
+6. Update navigation and layouts accordingly  
+
+<Callout type="warning">
+This operation is destructive. Create a new branch before removing the auth module.
+</Callout>
+
+---
+
+# 10. Quick Developer Tips
+
+- If redirect loops happen → inspect `middleware.ts`
+- If login works but UI doesn't update → check cookie polling in `useAuth`
+- If OTP flow breaks → verify `auth_flow` cookie structure
+- If messages are missing → ensure i18n messages exist under `i18n/messages/*`
+
+---
+
+# Final Note
+
+This authentication architecture is designed for **enterprise maintainability**, **security**, and **extensibility**.  
+It is strongly typed, predictable, and modular — making it suitable for large applications and team environments.

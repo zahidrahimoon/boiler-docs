@@ -1,0 +1,215 @@
+---
+title: "Dashboard Module"
+description: "Architecture, responsibilities, data shapes, and extension guide for the dashboard system."
+---
+
+import { Callout } from 'nextra/components'
+
+# Dashboard — Architecture & Developer Guide
+
+The dashboard located in `app/[locale]/dashboard` provides an extensible foundation for analytics, metrics, charts, performance stats, and data tables.  
+This document explains its architecture, data flow, components, and recommended extension patterns.
+
+---
+
+# 1. Purpose of the Dashboard
+
+The dashboard is designed to be:
+
+- Modular — charts, metrics, and tables are fully decoupled  
+- Scalable — easy to add new charts, metrics, or sections  
+- Performant — uses skeletons, lazy components, and optional mock datasets  
+- Internationalized — uses `useTranslations('dashboard')`  
+
+It follows the same **enterprise architecture philosophy** as the rest of your boilerplate.
+
+<Callout type="note">
+All dashboard data (metrics, charts, products, orders) is fetched via the `useDashboard` hook, creating a single orchestration layer.
+</Callout>
+
+---
+
+# 2. File Structure & Responsibilities
+
+Below are the most important files you need to understand.
+
+## **Route Entry**
+### `app/[locale]/dashboard/page.tsx`
+- Sets layout to **dashboard** using `setLayoutType("dashboard")`
+- Wraps content inside `<DynamicLayout>`
+- Renders `<DashboardContent />`
+
+## **Content Orchestration**
+### `components/dashboard-content.tsx`
+Handles:
+- Running `useDashboard()`  
+- Passing `metrics`, `products`, `orders` to child components  
+- Rendering the full dashboard structure:  
+  - Header  
+  - Metrics section  
+  - Charts section  
+  - Data tables  
+  - Performance footer
+
+## **Header**
+### `components/dashboard-header.tsx`
+Contains:
+- Refresh button  
+- Settings button  
+- Receives props like:
+```ts
+{ onRefresh, isLoading }
+```
+
+## **Metrics**
+### `components/metrics/*`
+Each metric card is:
+- Fully reusable  
+- Strictly typed  
+- Includes loading skeletons  
+
+Examples:
+- `TotalUsersCard`
+- `RevenueCard`
+- `ConversionCard`
+
+## **Charts**
+### `components/charts/*`
+Charts use **Recharts** and follow a consistent pattern:
+- Wrapped in `ChartCard` (header, badge, skeleton)
+- Loading handled automatically
+- Accepts:
+```ts
+data?: ChartDataPoint[]
+isLoading?: boolean
+```
+
+Charts included:
+- `RevenueChart`
+- `SalesChart`
+- `TrafficChart`
+- `ActivityChart`
+- `PerformanceChart`
+
+If `data` is undefined, each chart falls back to a small mock dataset for development.
+
+## **Data Sections**
+### `components/data/*`
+Contains data-driven widgets such as:
+- Product table  
+- Orders table  
+
+Tables use the shared `DataTable` component for consistent pagination.
+
+## **Types**
+### `dashboard/types/index.ts`
+Defines:
+- `MetricData`
+- `ChartDataPoint`
+- `Product`
+- `Order`
+- `DashboardProps`
+
+These types are used throughout UI + API layers.
+
+---
+
+# 3. Data Shapes (Summary)
+
+The dashboard uses well-defined data contracts.
+
+### **MetricData**
+```ts
+{
+  totalUsers: number
+  activeSessions: number
+  revenue: number
+  conversionRate: number
+  orders: number
+  growth: number
+  bounceRate: number
+  pageViews: number
+}
+```
+
+### **ChartDataPoint**
+Flexible shape for charts:
+```ts
+{
+  month?: string
+  revenue?: number
+  users?: number
+  orders?: number
+  sales?: number
+  profit?: number
+  time?: string
+  active?: number
+}
+```
+
+### **Product & Order**
+Simplified table entities:
+```ts
+interface Product { id: string; name: string; price: number; stock: number }
+interface Order { id: string; status: string; date: string; amount: number }
+```
+
+---
+
+# 4. Data Fetching — `useDashboard` Hook
+
+The entire dashboard fetch pipeline flows through a single hook:
+
+### Responsibilities:
+- Fetch metrics  
+- Fetch datasets for charts  
+- Fetch products + orders  
+- Normalize raw API data  
+- Expose loading state  
+- Provide `handleRefresh()`  
+
+### Typical Implementation:
+```ts
+return {
+  metrics,
+  products,
+  orders,
+  isLoading,
+  handleRefresh
+}
+```
+
+Recommended behavior:
+- Fetch all resources using `Promise.all`
+- Provide consistent shapes (normalize backend response)
+- Consider React Query for caching, stale-while-revalidate, retry logic
+
+<Callout type="tip">
+Keep all dashboard fetch logic inside `useDashboard()` to avoid fragmentation across components.
+</Callout>
+
+
+# 5. Internationalization
+
+All text inside dashboard components uses:
+
+```ts
+const t = useTranslations('dashboard')
+```
+
+To add translations:
+1. Add keys to `i18n/messages/en/dashboard.ts`
+2. Add same keys to `ur/dashboard.ts` (or other locales)
+
+
+---
+
+# Final Notes
+
+The dashboard is intentionally modular, predictable, and designed to scale.  
+Its architecture follows the core principles of the boilerplate:
+
+- Clear foldering  
+- Strong typing  
+- Client/server separation  
+- Extensibility  

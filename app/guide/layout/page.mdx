@@ -1,0 +1,68 @@
+---
+title: "Layout"
+description: "Concise guide to the dynamic layout system in Next.js Enterprise Starter Kit"
+---
+
+import { Callout } from 'nextra/components'
+
+# Layout 
+
+This guide explains the **dynamic layout system** in the project, including layout types, runtime behavior, and developer usage patterns.
+
+
+## Layout Modes
+
+- `website` — header + footer  
+- `dashboard` — header + sidebar  
+
+Layouts are controlled via `LAYOUT_CONFIGS` and the `LayoutProvider` context. The provider persists the chosen layout in local storage and exposes actions like `toggleSidebar` and `toggleMobileMenu`.
+
+<Callout type="note">
+💡 The dynamic layout system is lightweight, strongly typed, and easy to extend.
+</Callout>
+
+---
+
+## Configuration: `LAYOUT_CONFIGS`
+
+```ts
+export const LAYOUT_CONFIGS = {
+  website: { showHeader: true, showSidebar: false, showFooter: true },
+  dashboard: { showHeader: true, showSidebar: true, showFooter: false }
+} as const;
+```
+
+---
+
+
+## Developer Workflow
+
+Sometimes, you want a **specific page to use a certain layout**. For instance, a `Home` page should use the `website` layout:
+
+```tsx
+"use client";
+import { useEffect } from "react";
+import { useLayout } from "@/contexts/layout-context";
+import DynamicLayout from "@/components/layout/DynamicLayout";
+
+export default function HomePage() {
+  const { setLayoutType } = useLayout();
+
+  useEffect(() => {
+    setLayoutType("website");
+  }, [setLayoutType]);
+
+  return (
+    <DynamicLayout>
+      <h1>Welcome to the Home Page</h1>
+      <p>This page uses the website layout with header + footer.</p>
+    </DynamicLayout>
+  );
+}
+```
+
+<Callout type="tip">
+⚡ Wrapping the page in `<DynamicLayout>` ensures that all layout-related configs, sidebars, and headers are correctly applied.
+</Callout>
+
+

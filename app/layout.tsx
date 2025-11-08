@@ -39,10 +39,15 @@ export default async function RootLayout({
       // Suggested by `next-themes` package https://github.com/pacocoursey/next-themes#with-app
       suppressHydrationWarning
     >
-      <Head
-      // ... Your additional head options
-      >
-        {/* Your additional tags should be passed as `children` of `<Head>` element */}
+      <Head>
+        {/* Preload Playfair Display from Google Fonts */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;900&display=swap"
+          rel="stylesheet"
+        />
+        <style>{`:root { --font-heading: 'Playfair Display', serif; } body { font-family: var(--font-sans, Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial); } h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); } `}</style>
       </Head>
       <body>
         <Layout

@@ -1,0 +1,127 @@
+---
+title: "Language Switcher"
+description: "Guide for using, adding locales, and removing i18n in Next.js Enterprise Starter Kit"
+---
+
+import { Callout } from 'nextra/components'
+
+# Language Switcher 
+
+This guide explains the **`LanguageSwitcher` component** and the i18n system used in the boilerplate. It is written for developers familiar with basic React.
+
+It covers:
+
+- How the `LanguageSwitcher` works  
+- Adding a new locale or translation file  
+- Removing i18n entirely  
+
+---
+
+## Files to Know
+
+- `components/layout/language-switcher.tsx` — UI component for switching locales  
+- `i18n/routing.ts` — defines supported locales and localized paths  
+- `i18n/messages/*` — locale message modules (`en`, `ur`, etc.)  
+- `app/[locale]/layout.tsx` — root layout providing messages via `NextIntlClientProvider`  
+- `middleware.ts` — uses `next-intl/middleware` to enforce locale-prefixed routes  
+
+---
+
+## How the LanguageSwitcher Works
+
+1. Reads the current locale using `useLocale()` from `next-intl`.  
+2. Gets navigation helpers (`useRouter`, `usePathname`) wired to `i18n/routing.ts`.  
+3. When a user picks a language, it calls:
+
+```ts
+router.replace(pathname, { locale: newLocale })
+```
+
+This navigates to the same path with the selected locale (e.g., `/en/dashboard` → `/ur/dashboard`).
+
+<Callout type="note">
+ℹ️ Routes are locale-prefixed (e.g., `/en/login` or `/ur/login`). The routing file defines all available locales and their path mapping.
+</Callout>
+
+---
+
+## Adding a New Translation File
+
+1. Create a new folder under `i18n/messages/` (e.g., `es` for Spanish).  
+2. Copy the structure from an existing locale (`common.ts`, `layout.ts`, etc.).  
+3. Export message objects for each file. Example:
+
+```ts
+// i18n/messages/es/common.ts
+export default {
+  greeting: "Hola",
+  languageSwitcher: {
+    currentLanguage: "Idioma actual",
+    tooltip: "Cambiar idioma",
+    ariaLabel: "Cambiar idioma",
+  },
+};
+```
+
+4. Update `i18n/routing.ts`:
+
+```ts
+locales: ["en", "ur", "es"] as const;
+```
+
+5. Restart the dev server — the `LanguageSwitcher` will show the new locale automatically.
+
+<Callout type="tip">
+💡 Update the `locales` array inside `language-switcher.tsx` if you show flags or names in the UI.
+</Callout>
+
+
+
+## Adding New UI Text Keys
+
+1. Add the key to all locale files (or default locale first).  
+2. Use `useTranslations('namespace')` in components:
+
+```ts
+const t = useTranslations('common');
+t('greeting');
+```
+
+---
+
+## Wiring New Pages to i18n
+
+1. Place pages under `app/[locale]/my-page`.  
+2. Update `i18n/routing.ts` with localized paths if needed.  
+3. Use navigation helpers from `i18n/navigation.ts` to respect localized routes.
+
+---
+
+## Removing i18n Entirely
+
+Follow these steps carefully if you want a non-i18n setup:
+
+1. Remove `next-intl` from `package.json`.  
+2. Delete `i18n/routing.ts`, `i18n/navigation.ts`, and middleware usage.  
+3. Flatten `[locale]` folder structure in `app/` to regular routes.  
+4. Remove `NextIntlClientProvider` from layouts and static load messages.  
+5. Remove `getMessages` calls from server layouts/pages.  
+6. Update `language-switcher.tsx` or remove it entirely.  
+7. Replace all `useTranslations` calls with plain text or your own helper.  
+
+<Callout type="warning">
+⚠️ Removing i18n is destructive — keep a backup branch before performing these steps.
+</Callout>
+
+---
+
+## Quick Example for New Developers
+
+1. Create `i18n/messages/es/common.ts` with `greeting` key.  
+2. Add `es` to `i18n/routing.ts` locales.  
+3. Add `es` to the `locales` array in `language-switcher.tsx`.  
+4. Restart dev server and visit `/es` to see Spanish translations.
+
+<Callout type="tip">
+💡 Keep message keys identical across locales. Missing keys fallback to the default locale.
+</Callout>
