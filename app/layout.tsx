@@ -15,12 +15,16 @@ const navbar = (
   <Navbar
     logo={<b>⚡ Next.js Enterprise Starter</b>}
     logoLink={"/"}
-    projectLink="https://github.com/zahidrahimoon/next-starter"
-    chatLink="https://discord.gg/nextjs"
+    // point to the GitHub profile instead of the repo
+    projectLink="https://github.com/zahidrahimoon"
+    // removed Discord/chat link per request
   />
 );
 const footer = (
-  <Footer>MIT {new Date().getFullYear()} © Next.js Enterprise Starter Kit.</Footer>
+  <Footer>
+    MIT {new Date().getFullYear()} • Made by{' '}
+    <a href="https://github.com/zahidrahimoon">Muhammad Zahid Rahimoon</a>{' '}
+  </Footer>
 );
 
 const search = <Search placeholder="Search docs.."></Search>;
