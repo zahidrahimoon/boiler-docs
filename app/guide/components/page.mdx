@@ -1,0 +1,92 @@
+---
+title: "Components Overview"
+description: "Structure and responsibilities of the component system in the Next.js Enterprise Starter Kit."
+---
+
+import { Callout } from 'nextra/components'
+
+# Components Overview
+
+This document provides a structured overview of how components are organized in the project.  
+The system is divided into four main categories:
+
+- **shared** — cross-module reusable building blocks  
+- **ui (shadcn)** — design-system primitives and composite UI controls  
+- **layout** — structural and navigation components  
+- **form** — form primitives, field types, and validation wiring  
+
+Each category below includes a concise explanation and a **table containing the exact components within that category**.
+
+---
+
+# 1) Shared Components
+
+Components in the **shared** group are reusable across multiple features and pages.  
+They provide presentation helpers, wrappers, utilities, and small UI building blocks.
+
+## Shared Component Inventory
+
+| Category | Components |
+|---|---|
+| **shared/** | `alert-modal.tsx`, `app-error-wrapper.tsx`, `base-grid.tsx`, `breadcrumbs.tsx`, `cta-section.tsx`, `data-table.tsx`, `data-table-skeleton.tsx`, `error-boundary.tsx`, `fileupload.tsx`, `filter-wrapper.tsx`, `global-loader.tsx`, `heading.tsx`, `loader.tsx`, `network-error.tsx`, `page-head.tsx`, `pagination-section.tsx`, `popup-modal.tsx`, `pricing-card.tsx`, `pricing-section.tsx`, `scroll-to-top.tsx`, `searchable-select.tsx`, `section-border.tsx`, `table-header.tsx`, `table-search-input.tsx` |
+| **shared/types/** | `shared.ts` |
+| **shared/svgs/** | `cta-svg.tsx` |
+
+---
+
+# 2) UI Components (shadcn)
+
+The **ui** directory contains design-system primitives and composite controls used to build user interfaces. These components follow the shadcn/ui structure.
+
+## UI Component Inventory
+
+| Category | Components |
+|---|---|
+| **ui core files** | `avatar.tsx`, `badge.tsx`, `breadcrumb.tsx`, `calendar.tsx`, `card.tsx`, `carousel.tsx`, `chart.tsx`, `checkbox.tsx`, `collapsible.tsx`, `command.tsx`, `context-menu.tsx`, `dialog.tsx`, `drawer.tsx`, `dropdown-menu.tsx`, `form.tsx`, `hover-card.tsx`, `icons.tsx`, `input-otp.tsx`, `input.tsx`, `label.tsx`, `menubar.tsx`, `modal.tsx`, `navigation-menu.tsx`, `otp-input.tsx`, `pagination.tsx`, `popover.tsx`, `progress.tsx`, `radio-group.tsx`, `resizable.tsx`, `scroll-area.tsx`, `select.tsx`, `separator.tsx`, `sheet.tsx`, `skeleton.tsx`, `slider.tsx`, `sonner.tsx`, `switch.tsx`, `table.tsx`, `tabs.tsx`, `textarea.tsx`, `tiptap-editor.tsx`, `toast.tsx`, `toaster.tsx`, `toggle.tsx`, `toggle-group.tsx`, `tooltip.tsx` |
+| **ui/button/** | `button.tsx`, `button.stories.tsx` |
+| **ui/alert/** | `alert.tsx`, `alert.stories.tsx` |
+| **ui/accordion/** | `accordion.tsx`, `accordian.stories.tsx` |
+| **ui/alertDialog/** | `alert-dialog.tsx` |
+| **ui/aspectRatio/** | `aspect-ratio.tsx` |
+
+---
+
+# 3) Layout Components
+
+Layout components define global structure, navigation, menus, and page-level wrappers.
+
+## Layout Component Inventory
+
+| Category | Components |
+|---|---|
+| **layout core** | `auth-buttons.tsx`, `dynamic-layout.tsx`, `header.tsx`, `language-switcher.tsx`, `mobile-hamburger-menu.tsx`, `sidebar.tsx`, `theme-toggle.tsx`, `user-profile.tsx` |
+| **layout/footer/** | `index.tsx` |
+| **layout/footer/variants/** | `centered-footer.tsx`, `compact-footer.tsx`, `detailed-footer.tsx`, `minimal-footer.tsx`, `simple-footer.tsx`, `social-footer.tsx` |
+| **layout/types/** | `layout.ts` |
+
+---
+
+# 4) Form Components
+
+The **form** directory contains the project’s field system, validation wiring, and primitive form builders.
+
+## Form Component Inventory
+
+| Category | Components |
+|---|---|
+| **form core** | `base-field.tsx`, `base-form.tsx`, `form-wrapper.tsx` |
+| **form fields** | `checkbox.tsx`, `color-picker.tsx`, `date-input.tsx`, `dynamic-select.tsx`, `file-upload.tsx`, `input.tsx`, `multi-select.tsx`, `radio-group.tsx`, `range-field.tsx`, `repeatable-field.tsx`, `select.tsx`, `tag-input.tsx`, `text-editor.tsx`, `textarea.tsx`, `toggle.tsx` |
+| **form types** | `form.ts` |
+
+---
+
+# Developer Notes
+
+<Callout type="note">
+Use these categories when deciding where a new component belongs. This ensures the architecture stays scalable and consistent.
+</Callout>
+
+- Add reusable visual helpers to **shared**  
+- Add design primitives or composite UI controls to **ui**  
+- Add navigation & structural components to **layout**  
+- Add any form input, schema, or wrapper to **form**  
