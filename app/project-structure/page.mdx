@@ -5,11 +5,11 @@ description: "Overview of the Next.js Enterprise Starter Kit project structure a
 
 import { Callout } from 'nextra/components'
 
-# Project Structure
+## Project Structure
 
 This explains the purpose, structure, and conventions of the **Next.js Enterprise Starter Kit**. It is intended for contributors, maintainers, and teams building production-ready Next.js applications.
 
-## High-Level Technologies
+### High-Level Technologies
 
 - Next.js 15 (App Router + server components)  
 - React 18  
@@ -26,7 +26,7 @@ This explains the purpose, structure, and conventions of the **Next.js Enterpris
 
 ---
 
-## Top-Level Files
+### Top-Level Files
 
 | File | Purpose |
 |------|---------|
@@ -41,16 +41,16 @@ This explains the purpose, structure, and conventions of the **Next.js Enterpris
 
 ---
 
-## Folder Structure
+### Folder Structure
 
-### `app/`
+#### `app/`
 Next.js App Router pages and layouts.
 
 - `globals.css` — global styles  
 - `[locale]/` — localized route roots  
 - Folders like `dashboard`, `home`, `users`, 
 
-### `components/`
+#### `components/`
 Shared React components.
 
 - `form/` — base form wrappers and fields  
@@ -58,48 +58,48 @@ Shared React components.
 - `shared/` — utilities, modals, loaders, tables
 - `ui/` — shadcn/ui-based components
 
-### `contexts/`
+#### `contexts/`
 React Context providers for global state.
 
 - Examples: `error-context.tsx`, `global-loading-context.tsx` , `layout-context.tsx`
 
-### `hooks/`
+#### `hooks/`
 Reusable hooks (e.g., `use-auth.ts`, `use-toast.ts`)
 
-### `i18n/`
+#### `i18n/`
 Internationalization utilities and message catalogs.
 
-### `lib/`
+#### `lib/`
 Shared utilities and helpers.
 
 - `actions/` — server or background actions  
 - `axios/`, `cookie/` — HTTP/cookie helpers  
 - `utils.ts`, `error-factory.ts`, `icons.ts` — generic helpers
 
-### `logger/`
+#### `logger/`
 Pino logging configuration
 
-### `providers/`
+#### `providers/`
 App-level React providers (theme, state, analytics)
 
-### `redux/`
+#### `redux/`
 Redux store and slices
 
-### `socket/`
+#### `socket/`
 Socket.io client wrappers
 
-### `validations/`
+#### `validations/`
 Input and schema validation (Zod)
 
-### `public/`
+#### `public/`
 Static assets
 
-### `__tests__/`
+#### `__tests__/`
 Unit, integration, and e2e tests
 
 ---
 
-## Important Scripts
+### Important Scripts
 
 ```bash
 npm run dev        # Start dev server
@@ -117,7 +117,7 @@ npm run storybook  # Start Storybook
 
 ---
 
-## Conventions and Architecture Notes
+### Conventions and Architecture Notes
 
 - TypeScript-first: Always type props and return types  
 - Component composition preferred over large prop interfaces  

@@ -5,14 +5,14 @@ description: "Architecture, responsibilities, data shapes, and extension guide f
 
 import { Callout } from 'nextra/components'
 
-# Dashboard — Architecture & Developer Guide
+## Dashboard Module
 
 The dashboard located in `app/[locale]/dashboard` provides an extensible foundation for analytics, metrics, charts, performance stats, and data tables.  
 This document explains its architecture, data flow, components, and recommended extension patterns.
 
 ---
 
-# 1. Purpose of the Dashboard
+### 1. Purpose of the Dashboard
 
 The dashboard is designed to be:
 
@@ -29,17 +29,17 @@ All dashboard data (metrics, charts, products, orders) is fetched via the `useDa
 
 ---
 
-# 2. File Structure & Responsibilities
+### 2. File Structure & Responsibilities
 
 Below are the most important files you need to understand.
 
-## **Route Entry**
+#### **Route Entry**
 ### `app/[locale]/dashboard/page.tsx`
 - Sets layout to **dashboard** using `setLayoutType("dashboard")`
 - Wraps content inside `<DynamicLayout>`
 - Renders `<DashboardContent />`
 
-## **Content Orchestration**
+#### **Content Orchestration**
 ### `components/dashboard-content.tsx`
 Handles:
 - Running `useDashboard()`  
@@ -51,7 +51,7 @@ Handles:
   - Data tables  
   - Performance footer
 
-## **Header**
+#### **Header**
 ### `components/dashboard-header.tsx`
 Contains:
 - Refresh button  
@@ -61,7 +61,7 @@ Contains:
 { onRefresh, isLoading }
 ```
 
-## **Metrics**
+#### **Metrics**
 ### `components/metrics/*`
 Each metric card is:
 - Fully reusable  
@@ -73,7 +73,7 @@ Examples:
 - `RevenueCard`
 - `ConversionCard`
 
-## **Charts**
+#### **Charts**
 ### `components/charts/*`
 Charts use **Recharts** and follow a consistent pattern:
 - Wrapped in `ChartCard` (header, badge, skeleton)
@@ -93,7 +93,7 @@ Charts included:
 
 If `data` is undefined, each chart falls back to a small mock dataset for development.
 
-## **Data Sections**
+#### **Data Sections**
 ### `components/data/*`
 Contains data-driven widgets such as:
 - Product table  
@@ -101,7 +101,7 @@ Contains data-driven widgets such as:
 
 Tables use the shared `DataTable` component for consistent pagination.
 
-## **Types**
+#### **Types**
 ### `dashboard/types/index.ts`
 Defines:
 - `MetricData`
@@ -114,11 +114,11 @@ These types are used throughout UI + API layers.
 
 ---
 
-# 3. Data Shapes (Summary)
+### 3. Data Shapes (Summary)
 
 The dashboard uses well-defined data contracts.
 
-### **MetricData**
+#### **MetricData**
 ```ts
 {
   totalUsers: number
@@ -132,7 +132,7 @@ The dashboard uses well-defined data contracts.
 }
 ```
 
-### **ChartDataPoint**
+#### **ChartDataPoint**
 Flexible shape for charts:
 ```ts
 {
@@ -147,7 +147,7 @@ Flexible shape for charts:
 }
 ```
 
-### **Product & Order**
+#### **Product & Order**
 Simplified table entities:
 ```ts
 interface Product { id: string; name: string; price: number; stock: number }
@@ -156,11 +156,11 @@ interface Order { id: string; status: string; date: string; amount: number }
 
 ---
 
-# 4. Data Fetching — `useDashboard` Hook
+### 4. Data Fetching — `useDashboard` Hook
 
 The entire dashboard fetch pipeline flows through a single hook:
 
-### Responsibilities:
+#### Responsibilities:
 - Fetch metrics  
 - Fetch datasets for charts  
 - Fetch products + orders  
@@ -168,7 +168,7 @@ The entire dashboard fetch pipeline flows through a single hook:
 - Expose loading state  
 - Provide `handleRefresh()`  
 
-### Typical Implementation:
+#### Typical Implementation:
 ```ts
 return {
   metrics,
@@ -189,7 +189,7 @@ Keep all dashboard fetch logic inside `useDashboard()` to avoid fragmentation ac
 </Callout>
 
 
-# 5. Internationalization
+### 5. Internationalization
 
 All text inside dashboard components uses:
 
@@ -204,7 +204,7 @@ To add translations:
 
 ---
 
-# Final Notes
+## Final Notes
 
 The dashboard is intentionally modular, predictable, and designed to scale.  
 Its architecture follows the core principles of the boilerplate:

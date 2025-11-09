@@ -5,7 +5,7 @@ description: "Full technical documentation for the User Module — Redux, API, U
 
 import { Callout } from 'nextra/components'
 
-# User Module
+## User Module
 
 The **User Module** implements a robust CRUD workflow (list, detail, create, update, delete) built with Redux, React Query patterns, modular UI components, and server-side pagination.
 
@@ -23,7 +23,7 @@ It intentionally favors clarity and detail suitable for enterprise environments.
 
 ---
 
-# 1. Module Purpose
+### 1. Module Purpose
 
 The User module handles:
 
@@ -41,19 +41,19 @@ This module follows the project’s domain-first architecture: all logic for use
 
 ---
 
-# 2. Where the Code Lives
+### 2. Where the Code Lives
 
 **Primary folders and files:**
 
-### **Redux Layer**
+#### **Redux Layer**
 - `redux/slices/user-slice.ts`  
   Contains slice state, reducers, and all async thunks.
 
-### **Types**
+#### **Types**
 - `app/[locale]/users/types/user.ts`  
   Shared TypeScript types for user entities, API requests, and list params.
 
-### **UI Components**
+#### **UI Components**
 - `app/[locale]/users/page.tsx`  
   Entry point for the user list page (queries, layout, dispatching fetch).
 - `components/user-table/index.tsx`  
@@ -67,7 +67,7 @@ This module follows the project’s domain-first architecture: all logic for use
 
 ---
 
-# 3. Full Data Flow Diagram
+### 3. Full Data Flow Diagram
 
 This is the core flow developers must understand.
 
@@ -113,10 +113,10 @@ This is the core flow developers must understand.
 
 ---
 
-# 4. Redux Slice — Detailed Overview  
+### 4. Redux Slice — Detailed Overview  
 **File:** `redux/slices/user-slice.ts`
 
-### **State Shape**
+#### **State Shape**
 ```ts
 {
   users: UserModuleUser[],
@@ -128,7 +128,7 @@ This is the core flow developers must understand.
 }
 ```
 
-### **Async Thunks (API Operations)**
+#### **Async Thunks (API Operations)**
 
 | Thunk | HTTP | Purpose |
 |-------|------|---------|
@@ -146,10 +146,10 @@ These thunks use `axiosInstance`, ensuring:
 
 ---
 
-# 5. Types — Strong Contracts  
+### 5. Types — Strong Contracts  
 **File:** `app/[locale]/users/types/user.ts`
 
-### **Entity Type**
+#### **Entity Type**
 ```ts
 export interface UserModuleUser {
   id: string
@@ -166,7 +166,7 @@ export interface UserModuleUser {
 }
 ```
 
-### **API Shapes**
+#### **API Shapes**
 - `CreateUserRequest`
 - `UpdateUserRequest`
 - `UserListParams`
@@ -176,9 +176,9 @@ These types enforce correctness across reducers, thunks, and UI.
 
 ---
 
-# 6. UI Architecture
+### 6. UI Architecture
 
-### **User Table**
+#### **User Table**
 **Location:** `user-table/index.tsx`
 
 Receives:
@@ -195,7 +195,7 @@ Internally renders:
 - `<UserTableActions />` – search, filter, create
 - `<DataTable columns={columns} data={users} />`
 
-### Columns Definition  
+#### Columns Definition  
 In `columns.tsx`, each field is defined using TanStack’s `ColumnDef`:
 
 ```ts
@@ -206,7 +206,7 @@ In `columns.tsx`, each field is defined using TanStack’s `ColumnDef`:
 }
 ```
 
-### Row-Level Actions (Edit/Delete/View)
+#### Row-Level Actions (Edit/Delete/View)
 `CellAction` dispatches:
 
 - `fetchUserById(id)`
@@ -215,7 +215,7 @@ In `columns.tsx`, each field is defined using TanStack’s `ColumnDef`:
 
 ---
 
-# 7. Form System — Create & Edit User
+### 7. Form System — Create & Edit User
 
 Forms follow the centralized system:
 
@@ -223,7 +223,7 @@ Forms follow the centralized system:
 - `Zod` validation schemas
 - Field configs (id, name, type, label)
 
-### Benefits:
+#### Benefits:
 - Uniform styling  
 - Reusable validation  
 - Built-in loading indicators  
@@ -231,7 +231,7 @@ Forms follow the centralized system:
 
 ---
 
-# 8. Performance Considerations
+### 8. Performance Considerations
 
 - Use server-side pagination (already implemented)
 - Keep rows lightweight
@@ -242,7 +242,7 @@ Forms follow the centralized system:
 ---
 
 
-# Final Notes
+## Final Notes
 
 This module is designed for **extensibility**, **scalability**, and **clarity**.  
 All patterns follow enterprise best practices:

@@ -5,12 +5,12 @@ description: "Concise guide to the dynamic layout system in Next.js Enterprise S
 
 import { Callout } from 'nextra/components'
 
-# Layout 
+## Layout 
 
 This guide explains the **dynamic layout system** in the project, including layout types, runtime behavior, and developer usage patterns.
 
 
-## Layout Modes
+### Layout Modes
 
 - `website` — header + footer  
 - `dashboard` — header + sidebar  
@@ -23,7 +23,7 @@ Layouts are controlled via `LAYOUT_CONFIGS` and the `LayoutProvider` context. Th
 
 ---
 
-## Configuration: `LAYOUT_CONFIGS`
+### Configuration: `LAYOUT_CONFIGS`
 
 ```ts
 export const LAYOUT_CONFIGS = {
@@ -35,7 +35,7 @@ export const LAYOUT_CONFIGS = {
 ---
 
 
-## Developer Workflow
+### Developer Workflow
 
 Sometimes, you want a **specific page to use a certain layout**. For instance, a `Home` page should use the `website` layout:
 

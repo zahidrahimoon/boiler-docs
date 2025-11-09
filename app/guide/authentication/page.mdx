@@ -12,7 +12,7 @@ It is built across **Redux**, **Axios**, **cookies**, **Next.js middleware**, **
 
 ---
 
-### 1. High-Level Architecture
+#### 1. High-Level Architecture
 
 Authentication consists of four tightly integrated layers:
 
@@ -27,7 +27,7 @@ This hybrid client/server model ensures secure access control even before React 
 
 ---
 
-### 2. Authentication Flow Diagram
+#### 2. Authentication Flow Diagram
 
 A new developer should understand this before modifying anything.
 
@@ -100,10 +100,10 @@ The flow always begins in the **client** but access enforcement always ends in t
 
 ---
 
-### 3. Redux Auth Slice  
+#### 3. Redux Auth Slice  
 **Location:** `redux/slices/auth-slice.ts`
 
-### State Structure
+##### State Structure
 ```ts
 {
   user: User | null,
@@ -114,7 +114,7 @@ The flow always begins in the **client** but access enforcement always ends in t
 }
 ```
 
-### Async Thunks
+##### Async Thunks
 - `loginUser`
 - `signupUser`
 - `googleAuth`
@@ -124,17 +124,17 @@ All thunks use `axiosInstance` and persist the token using `setToken()`.
 
 ---
 
-### 4. Cookie System  
+#### 4. Cookie System  
 **Location:** `lib/cookie/cookie.ts`
 
-### Cookies Used
+##### Cookies Used
 | Cookie Key | Purpose |
 |------------|---------|
 | `auth_token` | Main authentication token |
 | `user_logged_in` | Quick boolean fallback |
 | User metadata cookies | Name, email, avatar for hydration |
 
-### Helpers
+##### Helpers
 - `setToken(token)`
 - `getToken()`
 - `removeToken()`
@@ -146,10 +146,10 @@ Middleware reads cookies directly from the browser request — this is the autho
 
 ---
 
-### 5. Client Auth Hook (`useAuth`)  
+#### 5. Client Auth Hook (`useAuth`)  
 **Location:** `hooks/use-auth.ts`
 
-### Responsibilities
+##### Responsibilities
 - Combine Redux + cookie fallback
 - Poll cookies every 2 seconds
 - Expose:
@@ -162,12 +162,12 @@ Middleware reads cookies directly from the browser request — this is the autho
 }
 ```
 
-### Why polling?
+##### Why polling?
 To keep auth synced across open tabs and during non-Redux page transitions.
 
 ---
 
-# 6. Auth Pages & Form Architecture  
+### 6. Auth Pages & Form Architecture  
 **Directory:** `app/[locale]/(auth)/`
 
 Pages:
@@ -186,10 +186,10 @@ All built using:
 
 ---
 
-# 7. Middleware-Based Route Protection  
+### 7. Middleware-Based Route Protection  
 **Location:** `middleware.ts`
 
-### Server-side checks:
+##### Server-side checks:
 - If `auth_token` missing → redirect to `/login`
 - If logged in → block access to `/(auth)` pages (login/signup)
 - OTP and Reset pages require valid `auth_flow` cookie
@@ -201,7 +201,7 @@ Middleware is what truly protects your application — not React components.
 
 ---
 
-# 8. AuthFlow (OTP / Reset Password)  
+### 8. AuthFlow (OTP / Reset Password)  
 Managed via `auth_flow` cookie:
 
 ```ts
@@ -216,7 +216,7 @@ Used by both client guards and middleware.
 
 ---
 
-# 09. Removing Authentication Entirely
+### 09. Removing Authentication Entirely
 
 1. Remove `auth-slice.ts` + slice registration  
 2. Remove cookie helpers  
@@ -231,7 +231,7 @@ This operation is destructive. Create a new branch before removing the auth modu
 
 ---
 
-# 10. Quick Developer Tips
+### 10. Quick Developer Tips
 
 - If redirect loops happen → inspect `middleware.ts`
 - If login works but UI doesn't update → check cookie polling in `useAuth`
@@ -240,7 +240,7 @@ This operation is destructive. Create a new branch before removing the auth modu
 
 ---
 
-# Final Note
+### Final Note
 
 This authentication architecture is designed for **enterprise maintainability**, **security**, and **extensibility**.  
 It is strongly typed, predictable, and modular — making it suitable for large applications and team environments.

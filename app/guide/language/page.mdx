@@ -5,11 +5,11 @@ description: "Guide for using, adding locales, and removing i18n in Next.js Ente
 
 import { Callout } from 'nextra/components'
 
-# Language Switcher 
+## Language Switcher 
 
 This guide explains the **`LanguageSwitcher` component** and the i18n system used in the boilerplate. It is written for developers familiar with basic React.
 
-It covers:
+### It covers:
 
 - How the `LanguageSwitcher` works  
 - Adding a new locale or translation file  
@@ -17,7 +17,7 @@ It covers:
 
 ---
 
-## Files to Know
+### Files to Know
 
 - `components/layout/language-switcher.tsx` — UI component for switching locales  
 - `i18n/routing.ts` — defines supported locales and localized paths  
@@ -27,7 +27,7 @@ It covers:
 
 ---
 
-## How the LanguageSwitcher Works
+### How the LanguageSwitcher Works
 
 1. Reads the current locale using `useLocale()` from `next-intl`.  
 2. Gets navigation helpers (`useRouter`, `usePathname`) wired to `i18n/routing.ts`.  
@@ -45,7 +45,7 @@ This navigates to the same path with the selected locale (e.g., `/en/dashboard` 
 
 ---
 
-## Adding a New Translation File
+### Adding a New Translation File
 
 1. Create a new folder under `i18n/messages/` (e.g., `es` for Spanish).  
 2. Copy the structure from an existing locale (`common.ts`, `layout.ts`, etc.).  
@@ -77,7 +77,7 @@ locales: ["en", "ur", "es"] as const;
 
 
 
-## Adding New UI Text Keys
+### Adding New UI Text Keys
 
 1. Add the key to all locale files (or default locale first).  
 2. Use `useTranslations('namespace')` in components:
@@ -89,7 +89,7 @@ t('greeting');
 
 ---
 
-## Wiring New Pages to i18n
+### Wiring New Pages to i18n
 
 1. Place pages under `app/[locale]/my-page`.  
 2. Update `i18n/routing.ts` with localized paths if needed.  
@@ -97,7 +97,7 @@ t('greeting');
 
 ---
 
-## Removing i18n Entirely
+### Removing i18n Entirely
 
 Follow these steps carefully if you want a non-i18n setup:
 
@@ -115,7 +115,7 @@ Follow these steps carefully if you want a non-i18n setup:
 
 ---
 
-## Quick Example for New Developers
+### Quick Example for New Developers
 
 1. Create `i18n/messages/es/common.ts` with `greeting` key.  
 2. Add `es` to `i18n/routing.ts` locales.  
