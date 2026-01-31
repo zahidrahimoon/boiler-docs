@@ -40,9 +40,19 @@ Create a `.env` file at the project root with the following values (remove any e
 
 ```env
 NEXT_PUBLIC_API_BASE_URL=https://next-boiler-backend.vercel.app/api
-NEXT_PUBLIC_SOCKET_URL=http://localhost:3001
-NEXT_PUBLIC_WS_URL=ws://localhost:3001
-NEXT_PUBLIC_SOCKET_MODE=socketio
+# NEXT_PUBLIC_API_BASE_URL=http://localhost:5000/api
+NEXT_PUBLIC_SOCKET_URL= http://localhost:3001
+NEXT_PUBLIC_WS_URL= ws://localhost:3001
+NEXT_PUBLIC_SOCKET_MODE= socketio
+NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyB6v4N-Fr7r606M78SgLFpqrmfYKupenx8
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=next-boiler-7ea7c.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=next-boiler-7ea7c
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=next-boiler-7ea7c.firebasestorage.app
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=962836123176
+NEXT_PUBLIC_FIREBASE_APP_ID=1:962836123176:web:c6d20fb50c2ad45b22af1d
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=G-4SJ2LZCZR1
+NEXT_PUBLIC_FIREBASE_VAPID_KEY=BDQdHcQSaI7CZK4WQYD71AyT3c2TYD12uZJG3uyf2tsGfsIj1R-p1C3wYe9n1-ex6kX2ZijOffmjqKMjhxX24FY
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=976918040687-gkdivm4iqj6p6n4hip9mt3hh6jos2p28.apps.googleusercontent.com
 ```
 
 After updating environment variables, restart the development server so the changes take effect. Don't commit `.env` to version control if it contains secrets or environment-specific values.
